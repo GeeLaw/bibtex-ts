@@ -68,9 +68,23 @@ Process
     );
     $local:Evaluator = [System.Text.RegularExpressions.MatchEvaluator]{
         Param ([System.Text.RegularExpressions.Match]$match)
+        $local:target = $match.Groups[2].Value;
         $local:Content = [System.IO.Path]::Combine($PSScriptRoot,
             'tmp', $match.Groups[2].Value);
-        $Content = [System.IO.File]::ReadAllText($Content);
+        If ($target.ToLowerInvariant().EndsWith('.js'))
+        {
+            $Content = [System.IO.File]::ReadAllText($Content);
+        }
+        Else
+        {
+            $target = [System.IO.Path]::Combine($Content, '__namespace.js');
+            $Content = Get-ChildItem `
+                -Path ([System.IO.Path]::Combine($Content, '*.js')) `
+                -Exclude '__namespace.js' |
+                ForEach-Object { [System.IO.File]::ReadAllText($_.FullName) };
+            $Content = $Content -join "`n;";
+            $Content += "`n;" + [System.IO.File]::ReadAllText($target);
+        }
         $Content = $match.Groups[1].Value + $Content + $match.Groups[3].Value;
         Return $Content;
     };

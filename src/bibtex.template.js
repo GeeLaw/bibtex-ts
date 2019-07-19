@@ -6,45 +6,17 @@
 ;
 /* helper.js @@ */
 
-/* @@ errors.js */
+/* @@ Strings */
 ;
-/* errors.js @@ */
+/* Strings @@ */
 
-/* @@ objectmodel.js */
+/* @@ ObjectModel */
 ;
-/* objectmodel.js @@ */
+/* ObjectModel @@ */
 
-/* @@ strings.js */
+/* @@ TeX */
 ;
-/* strings.js @@ */
-
-/* @@ parse-basics.js */
-;
-/* parse-basics.js @@ */
-
-/* @@ parse-id.js */
-;
-/* parse-id.js @@ */
-
-/* @@ parse-string.js */
-;
-/* parse-string.js @@ */
-
-/* @@ parse-comment.js */
-;
-/* parse-comment.js @@ */
-
-/* @@ parse-preamble.js */
-;
-/* parse-preamble.js @@ */
-
-/* @@ parse-strdef.js */
-;
-/* parse-strdef.js @@ */
-
-/* @@ parse-entry.js */
-;
-/* parse-entry.js @@ */
+/* TeX @@ */
 
 Helper.FreezeDescendants(ExportBibTeX);
 Helper.FreezeObject(ExportBibTeX);
