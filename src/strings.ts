@@ -101,7 +101,7 @@ class GroupedStringBuilder
      * it's safe to be consumed (indirectly) from JavaScript.
      * This is called by the constructor of `GroupedString`
      * as well as `GroupedString.Concat`, which use this method
-     * in a foreach loop. Since the library wants to support
+     * in a for-each loop. Since the library wants to support
      * arrays passed into those methods from JavaScript, here
      * seems to be the most elegant chance to type-check the
      * actual instances inside those arrays.
@@ -184,7 +184,10 @@ class GroupedString
         else
         {
             const builder = new GroupedStringBuilder();
-            pieces.forEach(builder.AddPiece.bind(builder));
+            for (const piece of pieces)
+            {
+                builder.AddPiece(piece);
+            }
             builder.PushLeftover();
             pieces = builder.Pieces;
         }
@@ -240,14 +243,16 @@ class GroupedString
                 ? theResult: this.Empty);
         }
         const builder = new GroupedStringBuilder();
-        const addPiece = builder.AddPiece.bind(builder);
-        groupedStrings.forEach(function (groupedString)
+        for (const groupedString of groupedStrings)
         {
             if (groupedString instanceof GroupedString)
             {
-                groupedString.Pieces.forEach(addPiece);
+                for (const piece of groupedString.Pieces)
+                {
+                    builder.AddPiece(piece);
+                }
             }
-        });
+        }
         builder.PushLeftover();
         return new GroupedString(builder);
     }
@@ -424,7 +429,7 @@ class StringConcatBuilder
      * it's safe to be consumed (indirectly) from JavaScript.
      * This is called by the constructor of `StringConcat`
      * as well as `StringConcat.Concat`, which use this method
-     * in a foreach loop. Since the library wants to support
+     * in a for-each loop. Since the library wants to support
      * arrays passed into those methods from JavaScript, here
      * seems to be the most elegant chance to type-check the
      * actual instances inside those arrays.
@@ -504,12 +509,12 @@ class StringConcatPrivates
                 this.Resolving = true;
                 this.Resolved = GroupedString.Empty;
                 const pieces: GroupedString[] = [];
-                this.Owner.Summands.forEach(function (summand)
+                for (const summand of this.Owner.Summands)
                 {
                     pieces.push(summand instanceof GroupedString
                         ? summand
                         : summand.Resolve(refresh));
-                });
+                }
                 this.Resolved = GroupedString.Concat(pieces);
             }
             finally
@@ -561,7 +566,10 @@ class StringConcat
         else
         {
             const builder = new StringConcatBuilder();
-            summands.forEach(builder.AddSummand.bind(builder));
+            for (const summand of summands)
+            {
+                builder.AddSummand(summand);
+            }
             summands = builder.Summands;
         }
         this._MutablePrivates = new StringConcatPrivates(this);
@@ -628,7 +636,16 @@ class StringConcat
                 ? theResult: this.Empty);
         }
         const builder = new StringConcatBuilder();
-        stringConcats.forEach(builder.AddSummand.bind<any>(builder));
+        for (const stringConcat of stringConcats)
+        {
+            if (stringConcat instanceof StringConcat)
+            {
+                for (const summand of stringConcat.Summands)
+                {
+                    builder.AddSummand(summand);
+                }
+            }
+        }
         return new StringConcat(builder);
     }
 }
