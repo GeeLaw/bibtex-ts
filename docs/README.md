@@ -69,3 +69,5 @@ The advantage of using a `PersonNameFormat` object is efficiency. Each time `Per
 ## `TeX` namespace
 
 This namespace has one abstract class `SimpleHandler`. It is a sufficient template to handle most TeX rendering you need in a `.bib` file. A handler can be created by deriving the class and implementing `EatXxx` methods and `Finish` method.
+
+The `TextRenderer` class is an example of how to use `SimpleHandler`. It implements a basic TeX to plain text converter that handles many (La)TeX commands. The handler does not handle equations (it recognizes them so that it can keep them intact). The handler is rather involved in handling diacritical marks, because it has to keep track of the first letter (grapheme) so that it attaches the diacritical mark to the correct position. For example, `\'{\^a}` should yield `a` with a hat above it, with acute accent, whereas `\^{\'a}` yields `a` with acute accent, with a hat above it. It would be incorrect to "simply insert the diacritical mark after the first Unicode codepoint in the string rendered by its first argument".
