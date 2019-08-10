@@ -102,7 +102,7 @@ class Strings_SpCharPiece implements Strings_IStringPiece
             {
                 value = '\\relax';
             }
-            else if (/[ \t\v\r\n]/.test(value[0]))
+            else if (/[ \t\v\f\r\n]/.test(value[0]))
             {
                 value = '\\relax{}' + value;
             }

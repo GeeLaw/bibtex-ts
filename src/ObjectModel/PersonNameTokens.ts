@@ -57,14 +57,14 @@ function ObjectModel_GetPersonNameTokens(
 {
     const results: ObjectModel_IPersonNameToken[] = [];
     let builder = new Strings_LiteralBuilder();
-    const rgxWhitespace = /[ \t\v\r\n]/;
+    const rgxWhitespace = /[ \t\v\f\r\n]/;
     /**
      * Case 1: a comma
      * Case 2: a link
      * Case 3: a word
      */
     const rgx =
-/(,)|([ \t\v\r\n~-])[ \t\v\r\n~-]*|[^, \t\v\r\n~-]+/g;
+/(,)|([ \t\v\f\r\n~-])[ \t\v\f\r\n~-]*|[^, \t\v\f\r\n~-]+/g;
     /* used to track whether the current "and" is a keyword
      * or a normal word */
     let sawWhitespace = false;

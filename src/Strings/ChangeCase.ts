@@ -129,7 +129,7 @@ function Strings_SpCharToUpperCase(
  * 
  * It is necessary to separate case 3/4 or the expression
  * becomes even more obscure. It is incorrect to write
- * \\(i|j|ss)[ \t\v\r\n]*(?![a-zA-Z]).
+ * \\(i|j|ss)[ \t\v\f\r\n]*(?![a-zA-Z]).
  * Write x for the space character. The first token in
  * \ixxy will be \ix instead of \ixx, which leads to
  * the incorrect result "I Y" (or rather, \relax I Y)
@@ -141,7 +141,7 @@ function Strings_SpCharToUpperCase(
  */
     let pasting = false;
     const converted = spch.Value.replace(
-/([a-z])[\u0000-\u005b\u005d-\u007f]*|\\(aa|ae|oe|o|l)(?![a-zA-Z])|\\(i|j|ss)[ \t\v\r\n]+|\\(i|j|ss)(?![a-zA-Z])|(\\)[a-zA-Z]+|\\[^a-zA-Z]|[^a-z\\]+/g,
+/([a-z])[\u0000-\u005b\u005d-\u007f]*|\\(aa|ae|oe|o|l)(?![a-zA-Z])|\\(i|j|ss)[ \t\v\f\r\n]+|\\(i|j|ss)(?![a-zA-Z])|(\\)[a-zA-Z]+|\\[^a-zA-Z]|[^a-z\\]+/g,
         function (match, alpha, spcmd, ijss1, ijss2, pastes)
         {
             const wasPasting = pasting;
@@ -244,7 +244,7 @@ class Strings_ToTitleCaseStateMachine
  * "Preserving" state must be managed in the object
  * itself because the next character might be a SpCharPiece.
  */
-/([A-Z])[\u0000-\u0039\u003b-\u007f]*|(:)[ \t\v\r\n]+|:[^A-Z:]*|[^A-Z:]+/g,
+/([A-Z])[\u0000-\u0039\u003b-\u007f]*|(:)[ \t\v\f\r\n]+|:[^A-Z:]*|[^A-Z:]+/g,
             function (match, alpha, colon)
             {
                 const wasPreserving = thisPreserving;

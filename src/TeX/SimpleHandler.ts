@@ -77,9 +77,14 @@ abstract class TeX_SimpleHandler
  * Case 8: Text.
  */
         const rgx =
-/\\([a-zA-Z]+)[ \t\v\r\n]*|\\([^a-zA-Z])|([{])|([}])|([$][$])|([$])|%[^\r\n]*(\r\n|\r|\n|$)|[^\\{}$%]+/g;
+/\\([a-zA-Z]+)[ \t\v\f\r\n]*|\\([^a-zA-Z])|([{])|([}])|([$][$])|([$])|[^\\{}$]+/g;
         let token: string[] | null = null;
-        const text = this.Text;
+        const text = this.Text.replace(/* remove comments */
+/\\([a-zA-Z]+)|\\([^a-zA-Z])|%[^\r\n]*(\r\n|\r|\n|$)|[^\\%]+/g,
+            function (match, _csname1, _csname2, comment)
+            {
+                return comment === undefined ? match : '';
+            });
         while (token = rgx.exec(text))
         {
             const csname = token[1] || token[2];
@@ -108,8 +113,7 @@ abstract class TeX_SimpleHandler
             {
                 this.EatInlineMathSwitcher();
             }
-            /* not a comment */
-            else if (token[7] === undefined)
+            else
             {
                 this.EatText(token[0]);
             }

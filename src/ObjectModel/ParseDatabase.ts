@@ -807,77 +807,77 @@ class ObjectModel_DatabaseParser
     }
 
     private readonly rgxTryEatLBraceLParen =
-        /[ \t\v\r\n]*(([{(])|[^{( \t\v\r\n])/g;
+        /[ \t\v\f\r\n]*(([{(])|[^{( \t\v\f\r\n])/g;
     private TryEatLBraceLParen(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatLBraceLParen); }
 
     private readonly rgxTryEatTypeId =
-        /[ \t\v\r\n]*(([a-zA-Z]+)|[^a-zA-Z \t\v\r\n])/g;
+        /[ \t\v\f\r\n]*(([a-zA-Z]+)|[^a-zA-Z \t\v\f\r\n])/g;
     private TryEatTypeId(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatTypeId); }
 
     private readonly rgxTryEatStringId =
-        /[ \t\v\r\n]*(([a-zA-Z_][a-zA-Z0-9_.:+/-]*)|[^a-zA-Z_ \t\v\r\n])/g;
+        /[ \t\v\f\r\n]*(([a-zA-Z_][a-zA-Z0-9_.:+/-]*)|[^a-zA-Z_ \t\v\f\r\n])/g;
     private TryEatStringId(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatStringId); }
 
     private readonly rgxTryEatEquals =
-        /[ \t\v\r\n]*(([=])|[^= \t\v\r\n])/g;
+        /[ \t\v\f\r\n]*(([=])|[^= \t\v\f\r\n])/g;
     private TryEatEquals(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatEquals); }
 
     private readonly rgxTryEatEntryId =
-        /[ \t\v\r\n]*(([a-zA-Z0-9_.:+/-]+)|[^a-zA-Z0-9_.:+/ \t\v\r\n-])/g;
+        /[ \t\v\f\r\n]*(([a-zA-Z0-9_.:+/-]+)|[^a-zA-Z0-9_.:+/ \t\v\f\r\n-])/g;
     private TryEatEntryId(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatEntryId); }
 
     private readonly rgxTryEatCommaEqualsRBrace =
-        /[ \t\v\r\n]*(([,=}])|[^,=} \t\v\r\n])/g;
+        /[ \t\v\f\r\n]*(([,=}])|[^,=} \t\v\f\r\n])/g;
     private TryEatCommaEqualsRBrace(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatCommaEqualsRBrace); }
 
     private readonly rgxTryEatCommaRBrace =
-        /[ \t\v\r\n]*(([,}])|[^,} \t\v\r\n])/g;
+        /[ \t\v\f\r\n]*(([,}])|[^,} \t\v\f\r\n])/g;
     private TryEatCommaRBrace(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatCommaRBrace); }
 
     private readonly rgxTryEatCommaEqualsRParen =
-        /[ \t\v\r\n]*(([,=)])|[^,=) \t\v\r\n])/g;
+        /[ \t\v\f\r\n]*(([,=)])|[^,=) \t\v\f\r\n])/g;
     private TryEatCommaEqualsRParen(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatCommaEqualsRParen); }
 
     private readonly rgxTryEatCommaRParen =
-        /[ \t\v\r\n]*(([,)])|[^,) \t\v\r\n])/g;
+        /[ \t\v\f\r\n]*(([,)])|[^,) \t\v\f\r\n])/g;
     private TryEatCommaRParen(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatCommaRParen); }
 
     private readonly rgxTryEatFieldId =
-        /[ \t\v\r\n]*(([a-zA-Z]+)|[^a-zA-Z \t\v\r\n])/g;
+        /[ \t\v\f\r\n]*(([a-zA-Z]+)|[^a-zA-Z \t\v\f\r\n])/g;
     private TryEatFieldId(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatFieldId); }
 
     private readonly rgxTryEatNumeral =
-        /[ \t\v\r\n]*(([0-9]+)|[^0-9 \t\v\r\n])/g;
+        /[ \t\v\f\r\n]*(([0-9]+)|[^0-9 \t\v\f\r\n])/g;
     private TryEatNumeral(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatNumeral); }
 
     private readonly rgxTryEatLBraceQuote =
-        /[ \t\v\r\n]*(([{"])|[^{" \t\v\r\n])/g;
+        /[ \t\v\f\r\n]*(([{"])|[^{" \t\v\f\r\n])/g;
     private TryEatLBraceQuote(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatLBraceQuote); }
 
     private readonly rgxTryEatPound =
-        /[ \t\v\r\n]*(([#])|[^# \t\v\r\n])/g;
+        /[ \t\v\f\r\n]*(([#])|[^# \t\v\f\r\n])/g;
     private TryEatPound(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatPound); }
 
     private readonly rgxTryEatRBrace =
-        /[ \t\v\r\n]*(([}])|[^} \t\v\r\n])/g;
+        /[ \t\v\f\r\n]*(([}])|[^} \t\v\f\r\n])/g;
     private TryEatRBrace(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatRBrace); }
 
     private readonly rgxTryEatRParen =
-        /[ \t\v\r\n]*(([)])|[^) \t\v\r\n])/g;
+        /[ \t\v\f\r\n]*(([)])|[^) \t\v\f\r\n])/g;
     private TryEatRParen(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatRParen); }
 

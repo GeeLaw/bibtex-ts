@@ -172,7 +172,7 @@ function ObjectModel_ParsePersonNames(
     {
         const onlyPiece = names.Pieces[0];
         if (onlyPiece instanceof Strings_BasicPiece
-            && /^[ \t\v\r\n]*$/.test(onlyPiece.Raw))
+            && /^[ \t\v\f\r\n]*$/.test(onlyPiece.Raw))
         {
             return [];
         }
