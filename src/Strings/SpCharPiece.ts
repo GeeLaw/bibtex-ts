@@ -28,7 +28,7 @@ class Strings_SpCharPieceBuilder
  * Case 7: Remove a possible trailing backslash.
  * Others: Keep them as-is.
  */
-/\\(AE|OE|ae|oe|ss|[LOijlo])(?![a-zA-Z])|\\(a)a(?![a-zA-Z])|\\(A)A(?![a-zA-Z])|\\[a-zA-Z]+|\\[^a-zA-Z]|[\u0000-\u002f\u003a-\u0040\u005b\u005d-\u0060\u007b-\u007f]+|\\$/g,
+/\\(AE|OE|ae|oe|ss|[LOijlo])(?![a-zA-Z])|\\(a)a(?![a-zA-Z])|\\(A)A(?![a-zA-Z])|\\[a-zA-Z]+\*?|\\[^a-zA-Z]|[\u0000-\u002f\u003a-\u0040\u005b\u005d-\u0060\u007b-\u007f]+|\\$/g,
             '$1$2$3');
         const probe = /[a-zA-Z]/.exec(purified);
         this.Case = (probe

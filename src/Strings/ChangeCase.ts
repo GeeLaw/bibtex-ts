@@ -50,7 +50,7 @@ function Strings_SpCharToLowerCase(
  *         trailing backslash).
  */
     const replaced = spch.Value.replace(
-/([A-Z])[\u0000-\u005b\u005d-\u007f]*|\\(AA|AE|OE|O|L)(?![a-zA-Z])|\\[a-zA-Z]+|\\[^a-zA-Z]/g,
+/([A-Z])[\u0000-\u005b\u005d-\u007f]*|\\(AA|AE|OE|O|L)(?![a-zA-Z])|\\[a-zA-Z]+\*?|\\[^a-zA-Z]/g,
         function (match, alpha, spcmd)
         {
             return (alpha !== undefined || spcmd !== undefined
@@ -141,7 +141,7 @@ function Strings_SpCharToUpperCase(
  */
     let pasting = false;
     const converted = spch.Value.replace(
-/([a-z])[\u0000-\u005b\u005d-\u007f]*|\\(aa|ae|oe|o|l)(?![a-zA-Z])|\\(i|j|ss)[ \t\v\f\r\n]+|\\(i|j|ss)(?![a-zA-Z])|(\\)[a-zA-Z]+|\\[^a-zA-Z]|[^a-z\\]+/g,
+/([a-z])[\u0000-\u005b\u005d-\u007f]*|\\(aa|ae|oe|o|l)(?![a-zA-Z])|\\(i|j|ss)[ \t\v\f\r\n]+|\\(i|j|ss)(?![a-zA-Z])|(\\)[a-zA-Z]+\*?|\\[^a-zA-Z]|[^a-z\\]+/g,
         function (match, alpha, spcmd, ijss1, ijss2, pastes)
         {
             const wasPasting = pasting;
