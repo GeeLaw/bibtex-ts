@@ -225,14 +225,14 @@ class Strings_Literal
         if (!(summands instanceof Array)
             || summands.length === 0)
         {
-            return this.Empty;
+            return Strings_Literal.Empty;
         }
         if (summands.length === 1)
         {
             const summand = summands[0];
             return (summand instanceof Strings_Literal
                 ? summand
-                : this.Empty);
+                : Strings_Literal.Empty);
         }
         const builder = new Strings_LiteralBuilder();
         for (const item of summands)

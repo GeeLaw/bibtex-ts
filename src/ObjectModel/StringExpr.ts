@@ -232,13 +232,14 @@ class ObjectModel_StringExpr
         if (!(strexprs instanceof Array)
             || strexprs.length === 0)
         {
-            return this.Empty;
+            return ObjectModel_StringExpr.Empty;
         }
         if (strexprs.length === 1)
         {
             const theResult = strexprs[0];
             return (theResult instanceof ObjectModel_StringExpr
-                ? theResult : this.Empty);
+                ? theResult
+                : ObjectModel_StringExpr.Empty);
         }
         const builder = new ObjectModel_StringExprBuilder();
         for (const strexpr of strexprs)
