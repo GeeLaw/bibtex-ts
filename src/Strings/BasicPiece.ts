@@ -14,7 +14,7 @@ class Strings_BasicPieceBuilder
         this.Case = (probe
             ? /[A-Z]/.test(probe[0]) ? 'U' : 'l'
             : '?');
-        this.Purified = value.replace(/[~\t\v-]/g, ' ').replace(
+        this.Purified = value.replace(/[~\t\v\f-]/g, ' ').replace(
 /[\u0000-\u001f\u0021-\u002f\u003a-\u0040\u005b-\u0060\u007b-\u007f]+/g,
             '');
         Helper.FreezeObject(this);
