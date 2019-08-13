@@ -1,3 +1,5 @@
+type Styles_EntryOrEntryData = ObjectModel_Entry | ObjectModel_EntryData;
+
 class Styles_Alpha
 {
     /**
@@ -113,7 +115,7 @@ class Styles_Alpha
      * @param entry   The `Entry` or `EntryData` object.
      */
     public static GetEntry3Letters(usePlus: boolean,
-        entry: ObjectModel_Entry | ObjectModel_EntryData): string
+        entry: Styles_EntryOrEntryData): string
     {
         if (entry instanceof ObjectModel_EntryData)
         {
@@ -170,7 +172,7 @@ class Styles_Alpha
      * @param entry The `Entry` or `EntryData` object.
      */
     public static GetEntryYear2Digits(
-        entry: ObjectModel_Entry | ObjectModel_EntryData): string
+        entry: Styles_EntryOrEntryData): string
     {
         if (entry instanceof ObjectModel_EntryData)
         {
@@ -201,7 +203,7 @@ class Styles_Alpha
      * @param entry   The `Entry` or `EntryData` object.
      */
     public static GetEntryBaseNickname(usePlus: boolean,
-        entry: ObjectModel_Entry | ObjectModel_EntryData): string
+        entry: Styles_EntryOrEntryData): string
     {
         if (entry instanceof ObjectModel_EntryData)
         {
@@ -213,5 +215,81 @@ class Styles_Alpha
         }
         return Styles_Alpha.GetEntry3Letters(usePlus, entry) +
             Styles_Alpha.GetEntryYear2Digits(entry);
+    }
+
+    private static readonly NicknameSuffix =
+        'abcdefghijklmnopqrstuvwxyzαβγδεζηθικλμξπρστφχψω';
+
+    public static GetEntriesNicknames(usePlus: boolean,
+        entries: Styles_EntryOrEntryData[]): string[]
+    {
+        const result: string[] = [];
+        if (!(entries instanceof Array))
+        {
+            return result;
+        }
+        const ltr3: string[] = [];
+        const yr2: string[] = [];
+        const name1: any = Helper.NewEmptyObject();
+        const name2: any = Helper.NewEmptyObject();
+        usePlus = !!usePlus;
+        /* Decide and count base nicknames. */
+        for (let entry of entries)
+        {
+            if (entry instanceof ObjectModel_EntryData)
+            {
+                entry = entry.Resolve();
+            }
+            if (!(entry instanceof ObjectModel_Entry))
+            {
+                ltr3.push('');
+                yr2.push('');
+                continue;
+            }
+            const ltr3entry = Styles_Alpha.GetEntry3Letters(usePlus, entry);
+            const yr2entry = Styles_Alpha.GetEntryYear2Digits(entry);
+            ltr3.push(ltr3entry);
+            yr2.push(yr2entry);
+            const baseNickname = ltr3entry + yr2entry;
+            if (baseNickname in name1)
+            {
+                ++name1[baseNickname];
+            }
+            else
+            {
+                name1[baseNickname] = 1;
+                name2[baseNickname] = 0;
+            }
+        }
+        const suffix = Styles_Alpha.NicknameSuffix;
+        /* Append suffices for collisions. */
+        for (let i = 0, len = ltr3.length; i !== len; ++i)
+        {
+            const ltr3entry = ltr3[i];
+            const yr2entry = yr2[i];
+            const baseNickname = ltr3entry + yr2entry;
+            if (baseNickname.length === 0)
+            {
+                result.push('');
+                continue;
+            }
+            if (name1[baseNickname] === 1)
+            {
+                result.push(baseNickname);
+                continue;
+            }
+            const order = name2[baseNickname]++;
+            if (order < suffix.length)
+            {
+                result.push(baseNickname + (yr2entry.length === 0
+                    ? '-' + suffix[order]
+                    : suffix[order]));
+            }
+            else
+            {
+                result.push(baseNickname + '-' + (order + 1));
+            }
+        }
+        return result;
     }
 }
