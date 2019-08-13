@@ -220,6 +220,25 @@ class Styles_Alpha
     private static readonly NicknameSuffix =
         'abcdefghijklmnopqrstuvwxyzαβγδεζηθικλμξπρστφχψω';
 
+    /**
+     * Gets the nicknames for the specified entries,
+     * appending suffices to collisions.
+     * 
+     * @param usePlus See `GetEntry3Letters`.
+     * @param entries An array of `Entry` or `EntryData` objects.
+     * 
+     * @returns An array of `string`s.
+     *          If `entries` is not an array, the result is
+     *          an empty array.
+     *          Otherwise, the result has the same length
+     *          as `entries`. At index `i`, if `entries[i]`
+     *          is an `Entry` or `EntryData` object, the
+     *          result will have non-empty string (the nickname)
+     *          at that index. Otherwise, the result will
+     *          have an empty string there.
+     *          Non-empty strings in the returned array will
+     *          (or should?) be mutually different.
+     */
     public static GetEntriesNicknames(usePlus: boolean,
         entries: Styles_EntryOrEntryData[]): string[]
     {
