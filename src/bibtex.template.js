@@ -18,6 +18,10 @@
 ;
 /* TeX @@ */
 
+/* @@ Styles */
+;
+/* Styles @@ */
+
 Helper.FreezeDescendants(ExportBibTeX);
 Helper.FreezeObject(ExportBibTeX);
 
