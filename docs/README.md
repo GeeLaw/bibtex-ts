@@ -66,8 +66,10 @@ console.log(name.Format(fmt));
 
 The advantage of using a `PersonNameFormat` object is efficiency. Each time `PersonName.Format` is called, the string needs to be parsed. If the same format is used for many names, parse the format string into a `PersonNameFormat` and use `PersonNameFormat.Format`.
 
+## `Styles` namespace
+
+This namespace currently contains 1 class, `Alpha`. It provides utilities for formatting an entry in `alpha.bst` style. Most consumers should use `Alpha.GetEntriesNicknames` method, which produces the nicknames for a list of entries.
+
 ## `TeX` namespace
 
-This namespace has one abstract class `SimpleHandler`. It is a sufficient template to handle most TeX rendering you need in a `.bib` file. A handler can be created by deriving the class and implementing `EatXxx` methods and `Finish` method.
-
-The `TextRenderer` class is an example of how to use `SimpleHandler`. It implements a basic TeX to plain text converter that handles many (La)TeX commands. The handler does not handle equations (it recognizes them so that it can keep them intact). The handler is rather involved in handling diacritical marks, because it has to keep track of the first letter (grapheme) so that it attaches the diacritical mark to the correct position. For example, `\'{\^a}` should yield `a` with a hat above it, with acute accent, whereas `\^{\'a}` yields `a` with acute accent, with a hat above it. It would be incorrect to "simply insert the diacritical mark after the first Unicode codepoint in the string rendered by its first argument".
+See [`TeX.md`](TeX.md).
