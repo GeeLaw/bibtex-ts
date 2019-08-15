@@ -419,7 +419,7 @@ class ObjectModel_DatabaseParser
             return true;
         }
         /* eid is either a citation key or a field name */
-        const possibleField = /^[a-zA-Z]+$/.test(efid);
+        const possibleField = /^[a-zA-Z_]+$/.test(efid);
         const afterEid = (this.myEntryCmdDelim === 0
             ? possibleField
             /* @entry{eid, or @entry{fid= or @entry{eid} */
@@ -812,7 +812,7 @@ class ObjectModel_DatabaseParser
     { return this.TryEatTemplate(this.rgxTryEatLBraceLParen); }
 
     private readonly rgxTryEatTypeId =
-        /[ \t\v\f\r\n]*(([a-zA-Z]+)|[^a-zA-Z \t\v\f\r\n])/g;
+        /[ \t\v\f\r\n]*(([a-zA-Z_]+)|[^a-zA-Z_ \t\v\f\r\n])/g;
     private TryEatTypeId(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatTypeId); }
 
@@ -852,7 +852,7 @@ class ObjectModel_DatabaseParser
     { return this.TryEatTemplate(this.rgxTryEatCommaRParen); }
 
     private readonly rgxTryEatFieldId =
-        /[ \t\v\f\r\n]*(([a-zA-Z]+)|[^a-zA-Z \t\v\f\r\n])/g;
+        /[ \t\v\f\r\n]*(([a-zA-Z_]+)|[^a-zA-Z_ \t\v\f\r\n])/g;
     private TryEatFieldId(): string | undefined
     { return this.TryEatTemplate(this.rgxTryEatFieldId); }
 
