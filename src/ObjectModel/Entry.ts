@@ -36,28 +36,43 @@ class ObjectModel_EntryDataPrivates
      * The controlling `EntryData` instance.
      */
     private readonly Owner: ObjectModel_EntryData;
+    private readonly ofKey: ObjectModel_EntryDataDict;
     /**
      * The cache of resolution.
      */
     private Resolved?: ObjectModel_Entry;
+    /**
+     * Whether the reference is being resolved.
+     * This prevents infinite recursion.
+     */
+    private Resolving: boolean;
 
     /**
      * Initializes a new `EntryDataPrivates` instance.
      * 
      * @param owner The controlling `EntryData` object.
+     * @param ofKey Used for `crossref`.
      */
-    public constructor(owner: ObjectModel_EntryData)
+    public constructor(owner: ObjectModel_EntryData,
+        ofKey: ObjectModel_EntryDataDict)
     {
         this.Owner = owner;
+        this.ofKey = ofKey;
         this.Resolved = undefined;
+        this.Resolving = false;
     }
 
     /**
      * Implements `EntryData.Unresolve`.
      */
-    public Unresolve()
+    public Unresolve(): boolean
     {
+        if (this.Resolving)
+        {
+            return false;
+        }
         this.Resolved = undefined;
+        return true;
     }
 
     /**
@@ -65,18 +80,47 @@ class ObjectModel_EntryDataPrivates
      */
     public Resolve(refresh?: boolean): ObjectModel_Entry
     {
-        if (refresh || !this.Resolved)
+        if (this.Resolving)
         {
-            this.Resolved = undefined;
-            const owner = this.Owner;
-            const result = new ObjectModel_Entry(owner.Type, owner.Id);
-            const fields = owner.Fields;
-            for (const field in fields)
+            return this.Resolved!;
+        }
+        try
+        {
+            this.Resolving = true;
+            if (refresh || !this.Resolved)
             {
-                result.Fields[field] = fields[field]!.Resolve(refresh);
+                const owner = this.Owner;
+                const result = new ObjectModel_Entry(owner.Type, owner.Id);
+                this.Resolved = result;
+                const fields = owner.Fields;
+                const resultFields = result.Fields;
+                for (const field in fields)
+                {
+                    resultFields[field] = fields[field]!.Resolve(refresh);
+                }
+                const crossref = resultFields['crossref'];
+                if (crossref !== undefined)
+                {
+                    const parent = this.ofKey[crossref.Raw];
+                    if (parent !== undefined)
+                    {
+                        const parentResolved = parent.Resolve(refresh);
+                        const parentFields = parentResolved.Fields;
+                        for (const field in parentFields)
+                        {
+                            if (resultFields[field] === undefined)
+                            {
+                                resultFields[field] = parentFields[field];
+                            }
+                        }
+                    }
+                }
+                Helper.FreezeObject(result.Fields);
             }
-            Helper.FreezeObject(result.Fields);
-            this.Resolved = result;
+        }
+        finally
+        {
+            this.Resolving = false;
         }
         return this.Resolved;
     }
@@ -121,9 +165,16 @@ class ObjectModel_EntryData
      * @param id   The identifier (citation key) of this entry.
      *             Use the empty string for keyless entry.
      */
-    public constructor(type: string, id: string)
+    public constructor(type: string, id: string,
+        ofKey: ObjectModel_EntryDataDict)
     {
-        this._MutablePrivates = new ObjectModel_EntryDataPrivates(this);
+        if ((typeof ofKey !== 'object' && typeof ofKey !== 'function')
+            || ofKey instanceof Number || ofKey instanceof String
+            || ofKey instanceof Boolean || !ofKey)
+        {
+            ofKey = Helper.NewEmptyObject();
+        }
+        this._MutablePrivates = new ObjectModel_EntryDataPrivates(this, ofKey);
         this.Type = ('' + (type || '')).toLowerCase();
         this.Id = '' + (id || '');
         this.Fields = Helper.NewEmptyObject();
@@ -142,10 +193,13 @@ class ObjectModel_EntryData
 
     /**
      * Clears the cached resolution.
+     * The cache cannot be cleared if resolution is in progress.
+     * 
+     * @returns Whether the cache was cleared.
      */
-    public Unresolve()
+    public Unresolve(): boolean
     {
-        this._MutablePrivates.Unresolve();
+        return this._MutablePrivates.Unresolve();
     }
 
     /**

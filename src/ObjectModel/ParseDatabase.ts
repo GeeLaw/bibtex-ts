@@ -446,10 +446,12 @@ class ObjectModel_DatabaseParser
             this.pfnNext = this.EatJunk;
             return true;
         }
+        const ofKey = this.Result.ofKey;
         /* @entry{eid, */
         if (afterEid === ',')
         {
-            this.myEntry = new ObjectModel_EntryData(this.myTypeId!, efid);
+            this.myEntry = new ObjectModel_EntryData(this.myTypeId!,
+                efid, ofKey);
             this.pfnNext = this.EatField;
             return true;
         }
@@ -461,7 +463,8 @@ class ObjectModel_DatabaseParser
                 this.LastIndex,
                 ObjectModel_ParseDatabaseError.ERROR_ENTRY_ID_MISSING
             ));
-            this.myEntry = new ObjectModel_EntryData(this.myTypeId!, '');
+            this.myEntry = new ObjectModel_EntryData(this.myTypeId!,
+                '', ofKey);
             this.myFieldId = efid.toLowerCase();
             /* Call EatStringExpr and transition to
              * EatFieldCleanup to store it. */
@@ -470,7 +473,8 @@ class ObjectModel_DatabaseParser
             return true;
         }
         /* @entry{eid} */
-        this.myEntry = new ObjectModel_EntryData(this.myTypeId!, efid);
+        this.myEntry = new ObjectModel_EntryData(this.myTypeId!,
+            efid, ofKey);
         this.pfnNext = this.EatEntryCleanup;
         return true;
     }
