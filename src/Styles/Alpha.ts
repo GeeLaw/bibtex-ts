@@ -94,7 +94,7 @@ class Styles_Alpha
      * Case 1: All names are empty.
      *         If `key` field is present, the result is the prefix
      *         of that field of length (at most) 3.
-     *         Otherwise, the result is the string `Anon`.
+     *         Otherwise, the result is the empty string.
      * Case 2: Exactly 1 name is non-empty.
      *         The result is `GetLastName3Letters` on that name.
      * Case 3: 1 to 3 names are non-empty.
@@ -150,7 +150,7 @@ class Styles_Alpha
             {
                 return key.Raw.substr(0, 3);
             }
-            return 'Anon';
+            return '';
         }
         if (result.length === 1)
         {
@@ -195,6 +195,10 @@ class Styles_Alpha
 
     /**
      * `GetEntry3Letters` + `GetEntryYear2Digits`.
+     * If `GetEntry3Letters` is the empty string,
+     * `Anon` is used instead.
+     * If `entry` is not an entry, the empty string
+     * is returned.
      * 
      * @param usePlus See `GetEntry3Letters`.
      * @param entry   The `Entry` or `EntryData` object.
@@ -210,8 +214,8 @@ class Styles_Alpha
         {
             return '';
         }
-        return Styles_Alpha.GetEntry3Letters(usePlus, entry) +
-            Styles_Alpha.GetEntryYear2Digits(entry);
+        return (Styles_Alpha.GetEntry3Letters(usePlus, entry)
+            || 'Anon') + Styles_Alpha.GetEntryYear2Digits(entry);
     }
 
     private static readonly NicknameSuffix =
@@ -262,7 +266,8 @@ class Styles_Alpha
                 yr2.push('');
                 continue;
             }
-            const ltr3entry = Styles_Alpha.GetEntry3Letters(usePlus, entry);
+            const ltr3entry =
+                Styles_Alpha.GetEntry3Letters(usePlus, entry) || 'Anon';
             const yr2entry = Styles_Alpha.GetEntryYear2Digits(entry);
             ltr3.push(ltr3entry);
             yr2.push(yr2entry);
