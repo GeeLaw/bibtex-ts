@@ -174,26 +174,23 @@ class Styles_Alpha
     public static GetEntryYear2Digits(
         entry: Styles_EntryOrEntryData): string
     {
-        if (entry instanceof ObjectModel_EntryData)
-        {
-            entry = entry.Resolve();
-        }
-        if (!(entry instanceof ObjectModel_Entry))
+        let year = Styles_ResolveYear(entry);
+        if (year != year)
         {
             return '';
         }
-        const year = entry.Fields['year'];
-        if (year === undefined)
+        if (year < 0)
         {
-            return '';
+            year = -year;
         }
-        const match =
-            /([0-9])?[^0-9]*([0-9])[^0-9]*$/.exec(year.PurifiedPedantic);
-        return (match === null
-            ? ''
-            : match[1] !== undefined
-            ? match[1] + match[2]
-            : match[2]);
+        if (year < 10)
+        {
+            return year.toString();
+        }
+        year %= 100;
+        return (year < 10
+            ? '0' + year.toString()
+            : year.toString());
     }
 
     /**
