@@ -530,7 +530,7 @@ abstract class TeX_SimpleRenderer
         this._MutablePrivates = new TeX_SimpleRendererPrivates(this, text);
     }
 
-    public GetResult(): any
+    public Render(): any
     {
         return this._MutablePrivates.Render();
     }

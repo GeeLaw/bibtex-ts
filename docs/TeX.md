@@ -2,6 +2,8 @@
 
 This namespace has an abstract class `SimpleHandler`. It is a sufficient template to handle most TeX rendering you need in a `.bib` file. A handler can be created by deriving the class and implementing `EatXxx` methods and `Finish` method. However, it's usually not worth the effort to directly implement `SimpleHandler`.
 
+The namespace also has a method `ToPlainText`, which takes a `string` and returns a `string`. This method simply creates a new instance of `TextRenderer` class with its argument and returns whatever `TextRenderer.Render` returns. It converts a TeX string into a plain string.
+
 ## `SimpleRenderer` class
 
 The `SimpleRenderer` class is an example of how to use `SimpleHandler`. It implements a basic recursive TeX handling template. The handler tokenises the character stream, asks its derived class in a structural way to render the content.

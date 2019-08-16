@@ -229,6 +229,16 @@ class TeX_TextRenderer
 
     public Render(): string
     {
-        return this._MutablePrivates.GetResult() as string;
+        return this._MutablePrivates.Render() as string;
     }
+}
+
+/**
+ * Converts TeX `string` into plain `string`.
+ * 
+ * @param text The TeX `string` to convert.
+ */
+function TeX_ToPlainText(text: string): string
+{
+    return (new TeX_TextRenderer(text)).Render();
 }
