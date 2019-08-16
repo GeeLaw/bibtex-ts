@@ -80,20 +80,20 @@ class ObjectModel_ParseDatabaseError
 'BibTeX.ParseDatabase: Expecting "=" after string identifier in "@string" command.',
 'BibTeX.ParseDatabase: Expecting "#" to concatenate another string or "}" to close "@string{...".',
 'BibTeX.ParseDatabase: Expecting "#" to concatenate another string or ")" to close "@string(...".',
-'BibTeX.ParseDatabase: Duplicated string identifier (the last one is kept).',
+'BibTeX.ParseDatabase: Duplicate string identifier (the last one is kept).',
 'BibTeX.ParseDatabase: Expecting entry identifier (citation key) or field identifier after "@entry{" or "@entry(".',
 'BibTeX.ParseDatabase: Expecting "," after entry identifier (citation key) or "=" after field identifier or "}" to close "@entry{...".',
 'BibTeX.ParseDatabase: Expecting "," after entry identifier (citation key) or "=" after field identifier or ")" to close "@entry(...".',
 'BibTeX.ParseDatabase: Expecting "," or "}" to continue/close "@entry{...".',
 'BibTeX.ParseDatabase: Expecting "," or ")" to continue/close "@entry(...".',
 'BibTeX.ParseDatabase: Warning for missing entry identifier (citation key).',
-'BibTeX.ParseDatabase: Duplicated entry identifier (citation key; the first entry is available by key).',
+'BibTeX.ParseDatabase: Duplicate entry identifier (citation key; the first entry is available by key).',
 'BibTeX.ParseDatabase: Expecting "}" to close "@entry{..." or a field identifier to continue it.',
 'BibTeX.ParseDatabase: Expecting ")" to close "@entry(..." or a field identifier to continue it.',
 'BibTeX.ParseDatabase: Expecting "#" to concatenate another string or "," to end the field or "}" to close "@entry{...".',
 'BibTeX.ParseDatabase: Expecting "#" to concatenate another string or "," to end the field or ")" to close "@entry(...".',
 'BibTeX.ParseDatabase: Expecting "=" after field identifier.',
-'BibTeX.ParseDatabase: Duplicated field identifier (the first field value is kept).',
+'BibTeX.ParseDatabase: Duplicate field identifier (the first field value is kept).',
 'BibTeX.ParseDatabase: Expecting numerals as a string literal, or a string identifier for a named string, or \'{\' or \'"\' to begin a string literal. ',
 'BibTeX.ParseDatabase: Unclosed string literal delimited with {} or "" (unbalanced braces?).',
 'BibTeX.ParseDatabase: Oustanding closing brace } in ""-delimited string literal.'
@@ -130,7 +130,7 @@ class ObjectModel_ParseDatabaseResult
 
     /**
      * Stores the entries by their citation key.
-     * In case a key is duplicated, the first entry
+     * In case a key is duplicate, the first entry
      * is put here.
      */
     public readonly ofKey: ObjectModel_EntryDataDict;
