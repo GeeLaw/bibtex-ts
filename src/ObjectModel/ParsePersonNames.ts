@@ -122,16 +122,16 @@ function ObjectModel_ResolveName_von_Last_Jr_First(
         ? 0
         : vonLastWords.length - 1);
     while (lastBegins !== 0 &&
-        vonLastWords[lastBegins].Case !== 'l')
+        vonLastWords[lastBegins - 1].Case !== 'l')
     {
         --lastBegins;
     }
     return new ObjectModel_PersonName(errcode,
         firstWords, firstLinks,
-        vonLastWords.slice(lastBegins),
-        vonLastLinks.slice(lastBegins),
         vonLastWords.slice(0, lastBegins),
         vonLastLinks.slice(0, lastBegins - 1),
+        vonLastWords.slice(lastBegins),
+        vonLastLinks.slice(lastBegins),
         jrWords, jrLinks);
 }
 
