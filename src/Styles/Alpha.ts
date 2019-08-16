@@ -1,7 +1,193 @@
 type Styles_EntryOrEntryData = ObjectModel_Entry | ObjectModel_EntryData;
+type Styles_Alpha_ReadonlySortedEntry = Readonly<Styles_Alpha_SortedEntry>;
+
+class Styles_Alpha_SortedEntry
+{
+    public readonly Source: Styles_EntryOrEntryData | undefined;
+    public readonly Entry: ObjectModel_Entry | undefined;
+    public Nickname: string;
+    public Entry3LetterUpperCase: string;
+    public readonly First: string[][];
+    public readonly von: string[][];
+    public readonly Last: string[][];
+    public readonly Jr: string[][];
+    public readonly Year: number;
+    public readonly Month: number;
+    public readonly OriginalIndex: number;
+
+    private static CompareWords(
+        words1: string[], words2: string[]): number
+    {
+        const l1 = words1.length;
+        const l2 = words2.length;
+        for (let i = 0; i !== l1 && i !== l2; ++i)
+        {
+            const n1 = words1[i];
+            const n2 = words2[i];
+            if (n1 < n2)
+            {
+                return -1;
+            }
+            if (n1 > n2)
+            {
+                return 1;
+            }
+        }
+        return l1 < l2 ? -1 : l1 > l2 ? 1 : 0;
+    }
+
+    private static CompareParts(parts1: string[][], parts2: string[][])
+    {
+        const l1 = parts1.length;
+        const l2 = parts2.length;
+        for (let i = 0; i !== l1 && i !== l2; ++i)
+        {
+            const result = Styles_Alpha_SortedEntry.CompareWords(
+                parts1[i], parts2[i]);
+            if (result)
+            {
+                return result;
+            }
+        }
+        return l1 < l2 ? -1 : l1 > l2 ? 1 : 0;
+    }
+
+    private static CompareNumbers(n1: number, n2: number): number
+    {
+        return (n1 != n1
+            ? n2 != n2
+                ? 0 /* n1, n2 are NaN */
+                : 1 /* n1 is NaN; n2 is a number */
+            : n2 != n2
+                ? -1 /* n1 is a number, n2 is NaN */
+            : n1 < n2 ? -1 : n1 > n2 ? 1 : 0);
+    }
+
+    private static CompareStrings(str1: string, str2: string): number
+    {
+        return (str1 === ''
+            ? str2 === '' ? 0 : 1
+            : str2 === '' ? -1
+            : str1 < str2 ? -1 : str1 > str2 ? 1 : 0);
+    }
+
+    /**
+     * Compares two `SortedEntry` objects within the same series.
+     * `Anon` entries are put at the end.
+     * 
+     * The entries are sorted:
+     * - In alphabetical order of 3-letter (without `+`).
+     * - In increasing order of `year`.
+     * - In increasing order of `month`.
+     * - In increasing order of Last parts of the names.
+     * - In increasing order of von parts of the names.
+     * - In increasing order of Jr parts of the names.
+     * - In increasing order of First parts of the names.
+     * - In original order.
+     */
+    public static Compare(entry1: Styles_Alpha_ReadonlySortedEntry,
+        entry2: Styles_Alpha_ReadonlySortedEntry): number
+    {
+        return (entry1.OriginalIndex === entry2.OriginalIndex
+            ? 0
+            : Styles_Alpha_SortedEntry.CompareStrings(
+                entry1.Entry3LetterUpperCase,
+                entry2.Entry3LetterUpperCase
+            ) || Styles_Alpha_SortedEntry.CompareNumbers(
+                entry1.Year, entry2.Year
+            ) || Styles_Alpha_SortedEntry.CompareNumbers(
+                entry1.Month, entry2.Month
+            ) || Styles_Alpha_SortedEntry.CompareParts(
+                entry1.Last, entry2.Last
+            ) || Styles_Alpha_SortedEntry.CompareParts(
+                entry1.von, entry2.von
+            ) || Styles_Alpha_SortedEntry.CompareParts(
+                entry1.Jr, entry2.Jr
+            ) || Styles_Alpha_SortedEntry.CompareParts(
+                entry1.First, entry2.First
+            ) || Styles_Alpha_SortedEntry.CompareNumbers(
+                entry1.OriginalIndex, entry2.OriginalIndex)
+            );
+    }
+
+    public static LaunderWords(name: ObjectModel_PersonName,
+        target: ObjectModel_PersonNameFormatComponentTarget): string[]
+    {
+        const result: string[] = [];
+        for (const word of name[target])
+        {
+            result.push(word.Purified.replace(/[a-z]+/g,
+                function (x) { return x.toUpperCase(); }));
+        }
+        return Helper.FreezeObject(result);
+    }
+
+    public constructor(trunc: boolean,
+        src: Styles_EntryOrEntryData | undefined,
+        idx: number)
+    {
+        this.Source = src;
+        const entry = (src instanceof ObjectModel_EntryData
+            ? src.Resolve()
+            : src instanceof ObjectModel_Entry
+            ? src
+            : undefined);
+        this.Entry = entry;
+        this.Nickname = '';
+        if (entry !== undefined)
+        {
+            const last = [], first = [], von = [], jr = [];
+            const people = entry.Fields['author'] || entry.Fields['editor'];
+            for (const person of (people !== undefined
+                ? ObjectModel_ParsePersonNames(people)
+                : []))
+            {
+                if (person.IsEtal())
+                {
+                    continue;
+                }
+                first.push(
+                    Styles_Alpha_SortedEntry.LaunderWords(person, 'First'));
+                von.push(
+                    Styles_Alpha_SortedEntry.LaunderWords(person, 'von'));
+                last.push(
+                    Styles_Alpha_SortedEntry.LaunderWords(person, 'Last'));
+                jr.push(
+                    Styles_Alpha_SortedEntry.LaunderWords(person, 'Jr'));
+            }
+            this.Nickname = Styles_Alpha.GetEntryBaseNickname(
+                trunc, entry);
+            this.Entry3LetterUpperCase =
+                Styles_Alpha.GetEntry3Letters(trunc, true, entry).replace(
+                /[a-z]+/g, function (x) { return x.toUpperCase() });
+            this.First = Helper.FreezeObject(first);
+            this.von = Helper.FreezeObject(von);
+            this.Last = Helper.FreezeObject(last);
+            this.Jr = Helper.FreezeObject(jr);
+            this.Year = Styles_ResolveYear(entry);
+            this.Month = Styles_ResolveMonth(entry);
+        }
+        else
+        {
+            const emptyArray = Helper.FreezeObject([]);
+            this.Nickname = '';
+            this.Entry3LetterUpperCase = '';
+            this.First = emptyArray;
+            this.von = emptyArray;
+            this.Last = emptyArray;
+            this.Jr = emptyArray;
+            this.Year = Number.NaN;
+            this.Month = Number.NaN;
+        }
+        this.OriginalIndex = idx;
+    }
+
+}
 
 class Styles_Alpha
 {
+    public static readonly SortedEntry = Styles_Alpha_SortedEntry;
+
     /**
      * Gets the last name in 1-letter format.
      * A word is non-empty if its purified form is non-empty.
@@ -87,34 +273,20 @@ class Styles_Alpha
 
     /**
      * Gets the 3-letter nickname of the entry.
-     * A name is non-empty, if `GetLastName1Letter` is non-empty.
-     * If `author` is present, it is used to resolve names.
-     * Otherwise, if `editor` is present, it is used to resolve names.
-     * Otherwise, the list of names is the empty list.
-     * Case 1: All names are empty.
-     *         If `key` field is present, the result is the prefix
-     *         of that field of length (at most) 3.
-     *         Otherwise, the result is the empty string.
-     * Case 2: Exactly 1 name is non-empty.
-     *         The result is `GetLastName3Letters` on that name.
-     * Case 3: 1 to 3 names are non-empty.
-     *         The result is the join of `GetLastName1Letter` on them.
-     * Case 4: More than 3 names are non-empty, `usePlus` is `false`.
-     *         Same as case 3.
-     * Case 5: More than 3 names are non-empty, `usePlus` is `true`.
-     *         The result is the join of `GetLastName1Letter` on
-     *         the first 3 names followed by a `+` sign.
      * 
      * @remarks The return value might well be longer than 3 for
      *          various reasons, including those specified in
      *          `GetLastName1Letter` and `GetLastName3Letters`.
      * 
-     * @param usePlus Whether or not the list should be
-     *                truncated if there are more than 3
-     *                non-empty names.
-     * @param entry   The `Entry` or `EntryData` object.
+     * @param trunc  Whether or not the list should be
+     *               truncated if there are more than 4
+     *               non-empty names.
+     * @param noPlus Whether or not the "and-others" `+`
+     *               sign should be suppressed.
+     * @param entry  The `Entry` or `EntryData` object.
      */
-    public static GetEntry3Letters(usePlus: boolean,
+    public static GetEntry3Letters(trunc: boolean,
+        noPlus: boolean,
         entry: Styles_EntryOrEntryData): string
     {
         if (entry instanceof ObjectModel_EntryData)
@@ -131,8 +303,15 @@ class Styles_Alpha
             : ObjectModel_ParsePersonNames(people));
         const result = [];
         let ltr3 = '';
+        let etal: '' | '+' = '';
         for (const name of names)
         {
+            /* "others" is always written as "+". */
+            if (name.IsEtal())
+            {
+                etal = '+';
+                continue;
+            }
             const ltr1 = Styles_Alpha.GetLastName1Letter(name);
             if (ltr1.length !== 0)
             {
@@ -143,6 +322,7 @@ class Styles_Alpha
                 }
             }
         }
+        /* All names are empty or etal. */
         if (result.length === 0)
         {
             const key = entry.Fields['key'];
@@ -152,15 +332,27 @@ class Styles_Alpha
             }
             return '';
         }
-        if (result.length === 1)
+        /* There are 5+ non-empty non-etal names,
+         * or there are 4 non-empty non-etal names and 1 etal.
+         * In short, the length is exceeding 4 (incl. the "+").
+         * In this case, we might want to truncate the list.
+         */
+        if ((result.length > 4 || (result.length === 4 && etal === '+'))
+            && !!trunc)
         {
-            return ltr3;
+            while (result.length !== 3)
+            {
+                result.pop();
+            }
+            etal = '+';
         }
-        if (result.length > 3 && !!usePlus)
+        if (!!noPlus)
         {
-            return result[0] + result[1] + result[2] + '+';
+            etal = '';
         }
-        return result.join('');
+        return (result.length === 1
+            ? ltr3
+            : result.join('')) + etal;
     }
 
     /**
@@ -200,10 +392,10 @@ class Styles_Alpha
      * If `entry` is not an entry, the empty string
      * is returned.
      * 
-     * @param usePlus See `GetEntry3Letters`.
+     * @param trunc See `GetEntry3Letters`.
      * @param entry   The `Entry` or `EntryData` object.
      */
-    public static GetEntryBaseNickname(usePlus: boolean,
+    public static GetEntryBaseNickname(trunc: boolean,
         entry: Styles_EntryOrEntryData): string
     {
         if (entry instanceof ObjectModel_EntryData)
@@ -214,64 +406,28 @@ class Styles_Alpha
         {
             return '';
         }
-        return (Styles_Alpha.GetEntry3Letters(usePlus, entry)
+        return (Styles_Alpha.GetEntry3Letters(trunc, false, entry)
             || 'Anon') + Styles_Alpha.GetEntryYear2Digits(entry);
     }
 
-    private static readonly NicknameSuffix =
+    public static readonly NicknameSuffix =
         'abcdefghijklmnopqrstuvwxyzαβγδεζηθικλμξπρστφχψω';
 
     /**
-     * Gets the nicknames for the specified entries,
-     * appending suffices to collisions.
+     * Gets the nicknames with suffices to prevent collisions.
+     * This method cannot be called twice for the same array.
      * 
-     * @param usePlus See `GetEntry3Letters`.
-     * @param entries An array of `Entry` or `EntryData` objects.
-     * 
-     * @returns An array of `string`s.
-     *          If `entries` is not an array, the result is
-     *          an empty array.
-     *          Otherwise, the result has the same length
-     *          as `entries`. At index `i`, if `entries[i]`
-     *          is an `Entry` or `EntryData` object, the
-     *          result will have non-empty string (the nickname)
-     *          at that index. Otherwise, the result will
-     *          have an empty string there.
-     *          Non-empty strings in the returned array will
-     *          (or should?) be mutually different.
+     * @param entries An array of `SortedEntry` objects.
      */
-    public static GetEntriesNicknames(usePlus: boolean,
-        entries: Styles_EntryOrEntryData[]): string[]
+    private static GetEntriesNicknames(
+        entries: Styles_Alpha_SortedEntry[]): void
     {
-        const result: string[] = [];
-        if (!(entries instanceof Array))
-        {
-            return result;
-        }
-        const ltr3: string[] = [];
-        const yr2: string[] = [];
         const name1: any = Helper.NewEmptyObject();
         const name2: any = Helper.NewEmptyObject();
-        usePlus = !!usePlus;
-        /* Decide and count base nicknames. */
-        for (let entry of entries)
+        /* Count base nicknames. */
+        for (const entry of entries)
         {
-            if (entry instanceof ObjectModel_EntryData)
-            {
-                entry = entry.Resolve();
-            }
-            if (!(entry instanceof ObjectModel_Entry))
-            {
-                ltr3.push('');
-                yr2.push('');
-                continue;
-            }
-            const ltr3entry =
-                Styles_Alpha.GetEntry3Letters(usePlus, entry) || 'Anon';
-            const yr2entry = Styles_Alpha.GetEntryYear2Digits(entry);
-            ltr3.push(ltr3entry);
-            yr2.push(yr2entry);
-            const baseNickname = ltr3entry + yr2entry;
+            const baseNickname = entry.Nickname;
             if (baseNickname in name1)
             {
                 ++name1[baseNickname];
@@ -284,32 +440,43 @@ class Styles_Alpha
         }
         const suffix = Styles_Alpha.NicknameSuffix;
         /* Append suffices for collisions. */
-        for (let i = 0, len = ltr3.length; i !== len; ++i)
+        for (const entry of entries)
         {
-            const ltr3entry = ltr3[i];
-            const yr2entry = yr2[i];
-            const baseNickname = ltr3entry + yr2entry;
-            if (baseNickname.length === 0)
+            const baseNickname = entry.Nickname;
+            if (baseNickname.length === 0 ||
+                name1[baseNickname] <= 1)
             {
-                result.push('');
-                continue;
-            }
-            if (name1[baseNickname] === 1)
-            {
-                result.push(baseNickname);
                 continue;
             }
             const order = name2[baseNickname]++;
-            if (order < suffix.length)
+            entry.Nickname +=
+                (order < suffix.length
+                    ? /[0-9]$/.test(baseNickname)
+                        ? suffix[order]
+                        : '-' + suffix[order]
+                    : '-' + (order + 1).toString());
+        }
+    }
+
+    public static SortEntriesAndGetNicknames(
+        trunc: boolean,
+        entries: Styles_EntryOrEntryData[]): Styles_Alpha_ReadonlySortedEntry[]
+    {
+        const result: Styles_Alpha_SortedEntry[] = [];
+        if (entries instanceof Array)
+        {
+            const len = entries.length;
+            for (let i = 0; i !== len; ++i)
             {
-                result.push(baseNickname + (yr2entry.length === 0
-                    ? '-' + suffix[order]
-                    : suffix[order]));
+                result.push(
+                    new Styles_Alpha_SortedEntry(trunc, entries[i], i));
             }
-            else
-            {
-                result.push(baseNickname + '-' + (order + 1));
-            }
+        }
+        result.sort(Styles_Alpha_SortedEntry.Compare);
+        Styles_Alpha.GetEntriesNicknames(result);
+        for (const item of result)
+        {
+            Helper.FreezeObject(item);
         }
         return result;
     }

@@ -22,7 +22,9 @@ function Styles_ResolveYear(entry: Styles_EntryOrEntryData): number
         return Number.NaN;
     }
     const yearString =
-        yearField.PurifiedPedantic.replace(/ /g, '').toLowerCase();
+        yearField.PurifiedPedantic.
+        replace(/ /g, '').
+        replace(/[A-Z]+/g, function (x) { return x.toLowerCase(); });
     /* Case 1: Number with/without sign. */
     {
         const rgx = /^[+-]?[0-9]{1,6}$/;
