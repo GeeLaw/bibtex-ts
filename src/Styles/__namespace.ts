@@ -64,7 +64,7 @@ const Styles_MonthTranslator =
     ['02', 'feb', '2', 'february'],
     ['03', 'mar', '3', 'march'],
     ['04', 'apr', '4', 'april'],
-    ['05', 'mar', '5', 'march'],
+    ['05', 'may', '5'],
     ['06', 'jun', '6', 'june'],
     ['07', 'jul', '7', 'july'],
     ['08', 'aug', '8', 'august'],
