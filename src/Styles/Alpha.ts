@@ -246,7 +246,9 @@ class Styles_AlphaImpl
         }
         if (etal)
         {
-            ret.value = result.join(', ') + ' et~al.';
+            ret.value = (result.length === 1
+                ? result[0] + ' et~al.'
+                : result.join(', ') + ', et~al.');
             ret.count = result.length + 1;
             return ret;
         }
@@ -257,7 +259,8 @@ class Styles_AlphaImpl
             return ret;
         }
         ret.value = result.slice(0, result.length - 1).join(', ') +
-            ' and ' + result[result.length - 1];
+            (result.length === 2 ? ' and ' : ', and ') +
+            result[result.length - 1];
         ret.count = result.length;
         return ret;
     }
@@ -374,7 +377,8 @@ class Styles_AlphaImpl
         const pages = this.field(entry, 'pages').Raw;
         if (pages.length !== 0)
         {
-            result += ':' + pages;
+            result += ':';
+            result += (/[-,]/.test(pages) ? this.n_dashify(pages) : pages);
         }
         return result;
     }
@@ -526,11 +530,7 @@ class Styles_AlphaImpl
             let journal = this.emph(this.field(entry, 'journal').Raw);
             journal = this.clause(journal, this.format_vol_num_pages(entry));
             journal = this.clause(journal, this.format_date(entry));
-            if (journal.length !== 0)
-            {
-                journal = 'In ' + journal;
-                result += this.sentence(journal);
-            }
+            result += this.sentence(journal);
         }
         else
         {
@@ -701,7 +701,8 @@ class Styles_AlphaImpl
             const address = this.field(entry, 'address').Raw;
             if (address.length !== 0)
             {
-                result += this.sentence(this.clause(clause12, date));
+                result += this.sentence(this.clause(clause12,
+                    this.clause(address, date)));
                 result += this.sentence(orgpub);
             }
             else if (orgpub.length !== 0)
@@ -858,40 +859,26 @@ class Styles_Alpha
     public static readonly SortedEntry = Styles_Alpha_SortedEntry;
 
     /**
-     * Gets the last name in 1-letter format.
-     * A word is non-empty if its purified form is non-empty.
-     * Let `w` be the first non-empty word in the last name.
-     * If the length-1 prefix of `w` is a non-empty word,
-     * the result is the purified form of this prefix.
-     * Otherwise, the result is the prefix of the purified
-     * form of `w` of length 1.
-     * If the last name only has empty words, the result
-     * is the empty string.
-     * 
-     * @remarks The return value might have more than 1
-     * letters. For example, if the first word in the last
-     * name is `{\relax Ch}ristophe`, then the return value
-     * will be `Ch`.
+     * Gets the initialism of the last name.
      * 
      * @param name The `PersonName` object.
      */
-    private static GetLastName1Letter(
+    private static GetLastNameInitialism(
         name: ObjectModel_PersonName): string
     {
+        const result = [];
         for (const lastName of name.Last)
         {
             const pfx1 = lastName.Prefix(1).Purified ||
                 lastName.Purified.substr(0, 1);
             if (pfx1.length !== 0)
             {
-                return pfx1;
+                result.push(pfx1);
             }
         }
-        return '';
+        return result.join('');
     }
 
-    private static readonly LastNameInitialsFormat =
-        ObjectModel_ParsePersonNameFormat('{l{}}');
     /**
      * Gets the last name in 3-letter format.
      * A word is non-empty if its purified form is non-empty.
@@ -902,7 +889,7 @@ class Styles_Alpha
      *         Otherwise, it's the prefix of the purified
      *         form of the word of length (at most) 3.
      * Case 2: More than 1 non-empty words in the last name.
-     *         The result is the name formatted in `{l{}}`.
+     *         The result is `GetLastNameInitialism`.
      * Case 3: 0 non-empty words in the last name.
      *         The result is the empty string.
      * 
@@ -937,15 +924,14 @@ class Styles_Alpha
         {
             return ltr3;
         }
-        return Styles_Alpha.LastNameInitialsFormat.Format(name);
+        return Styles_Alpha.GetLastNameInitialism(name);
     }
 
     /**
      * Gets the 3-letter nickname of the entry.
      * 
      * @remarks The return value might well be longer than 3 for
-     *          various reasons, including those specified in
-     *          `GetLastName1Letter` and `GetLastName3Letters`.
+     *          various reasons.
      * 
      * @param trunc  Whether or not the list should be
      *               truncated if there are more than 4
@@ -981,7 +967,7 @@ class Styles_Alpha
                 etal = '+';
                 continue;
             }
-            const ltr1 = Styles_Alpha.GetLastName1Letter(name);
+            const ltr1 = Styles_Alpha.GetLastNameInitialism(name);
             if (ltr1.length !== 0)
             {
                 result.push(ltr1);
