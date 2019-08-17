@@ -420,7 +420,7 @@ class Styles_AlphaImpl
     }
 
     private static readonly TRType =
-        Strings_ParseLiteral('Technical report').Result;
+        Strings_ParseLiteral('Technical Report').Result;
     private static format_tr_number(entry: ObjectModel_Entry)
     {
         const type = this.field(entry, 'type');
@@ -496,7 +496,7 @@ class Styles_AlphaImpl
         let result = 'In';
         if (booktitle.length !== 0)
         {
-            result += ' ' + booktitle;
+            result += ' ' + this.emph(booktitle);
         }
         else
         {
@@ -1120,7 +1120,7 @@ class Styles_AlphaImpl
                 Strings_Literal.Empty];
             if (order < suffix.length)
             {
-                if (/[0-9]$/.test(baseNickname))
+                if (!/[0-9]$/.test(baseNickname))
                 {
                     nickname[1] = this.NicknameConnector;
                 }
