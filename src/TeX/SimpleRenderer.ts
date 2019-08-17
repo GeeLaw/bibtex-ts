@@ -552,10 +552,14 @@ abstract class TeX_SimpleRenderer
         'fbox', 'frame', 'framebox',
         /* spaces */
         'hspace', 'vspace', 'hspace*', 'vspace*',
-        /* label, ref */
-        'label', 'ref',
+        /* label, ref, cite */
+        'label', 'ref', 'cite',
         /* punctuation spacing */
-        '@'
+        '@',
+        /* case alternation */
+        'uppercase', 'lowercase',
+        /* "and others" character */
+        'etalchar'
     ];
 
     /* 0-argument control sequences */

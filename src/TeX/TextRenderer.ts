@@ -56,7 +56,8 @@ class TeX_TextRendererPrivates extends TeX_SimpleRenderer
         obj['hspace*'] = '';
         obj['vspace*'] = '';
         obj['label'] = '';
-        obj['ref'] = '';
+        obj['ref'] = '?';
+        obj['cite'] = '[?]';
         /* space */
         obj[' '] = ' ';
         obj['!'] = '';
