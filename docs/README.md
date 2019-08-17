@@ -68,7 +68,7 @@ The advantage of using a `PersonNameFormat` object is efficiency. Each time `Per
 
 ## `Styles` namespace
 
-This namespace currently contains 1 class, `Alpha`. It provides utilities for formatting an entry in `alpha.bst` style. Most consumers should use `Alpha.SortEntriesAndGetNicknames` method, which produces the nicknames for a list of entries.
+This namespace currently contains 1 class, `Alpha`. It provides utilities for formatting an entry in `alpha.bst` style. Most consumers should first use `Alpha.ProcessEntries` method, which sorts the entries and produces the nicknames for a list of entries. After this, consumers can call `Alpha.GetEntryNicknameTeX` and `Alpha.GetEntryCitationTeX` for the TeX rendering of the nicknames and citations.
 
 ## `TeX` namespace
 
