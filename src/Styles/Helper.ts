@@ -115,13 +115,24 @@ class Styles_Helper
         return text.replace(/[ \t\v\f\r\n]*-+[ \t\v\f\r\n]*/g, '--');
     }
 
-    private static LaunderNamePart(name: ObjectModel_PersonName,
+    private static LaunderNameWords(name: ObjectModel_PersonName,
         target: ObjectModel_PersonNameFormatComponentTarget,
         result: string[]): string[]
     {
         for (const word of name[target])
         {
             result.push(this.purified_uppercase(word));
+        }
+        return result;
+    }
+
+    private static LaunderInitials(name: ObjectModel_PersonName,
+        target: ObjectModel_PersonNameFormatComponentTarget,
+        result: string[]): string[]
+    {
+        for (const word of name[target])
+        {
+            result.push(this.purified_uppercase(word.Prefix(1)));
         }
         return result;
     }
@@ -144,6 +155,7 @@ class Styles_Helper
     public static readonly EmptyArray = Helper.FreezeObject([]);
 
     public static CreateSortName(entry: ObjectModel_Entry,
+        firstAbbrv: boolean,
         first: string[][], vonLast: string[][], jr: string[][]): void
     {
         const authors = entry.Fields['author'];
@@ -156,12 +168,14 @@ class Styles_Helper
                 continue;
             }
             first.push(Helper.FreezeObject(
-                this.LaunderNamePart(person, 'First', [])));
+                firstAbbrv
+                ? this.LaunderNameWords(person, 'First', [])
+                : this.LaunderInitials(person, 'First', [])));
             vonLast.push(Helper.FreezeObject(
-                this.LaunderNamePart(person, 'Last',
-                this.LaunderNamePart(person, 'von', []))));
+                this.LaunderNameWords(person, 'Last',
+                this.LaunderNameWords(person, 'von', []))));
             jr.push(Helper.FreezeObject(
-                this.LaunderNamePart(person, 'Jr', [])));
+                this.LaunderNameWords(person, 'Jr', [])));
         }
         if (vonLast.length !== 0)
         {
@@ -177,12 +191,14 @@ class Styles_Helper
                 continue;
             }
             first.push(Helper.FreezeObject(
-                this.LaunderNamePart(person, 'First', [])));
+                firstAbbrv
+                ? this.LaunderNameWords(person, 'First', [])
+                : this.LaunderInitials(person, 'First', [])));
             vonLast.push(Helper.FreezeObject(
-                this.LaunderNamePart(person, 'Last',
-                this.LaunderNamePart(person, 'von', []))));
+                this.LaunderNameWords(person, 'Last',
+                this.LaunderNameWords(person, 'von', []))));
             jr.push(Helper.FreezeObject(
-                this.LaunderNamePart(person, 'Jr', [])));
+                this.LaunderNameWords(person, 'Jr', [])));
         }
         if (vonLast.length !== 0)
         {

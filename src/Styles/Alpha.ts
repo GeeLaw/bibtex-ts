@@ -66,7 +66,7 @@ class Styles_Alpha_SortedEntry implements Styles_IWithDate, Styles_IWithName
             this.NicknameSort = Styles_AlphaImpl.format_label_sort(entry);
             this.Year = Styles_ResolveYear(entry);
             this.Month = Styles_ResolveMonth(entry);
-            Styles_Helper.CreateSortName(entry, first, vonLast, jr);
+            Styles_Helper.CreateSortName(entry, false, first, vonLast, jr);
             this.First = Helper.FreezeObject(first);
             this.vonLast = Helper.FreezeObject(vonLast);
             this.Jr = Helper.FreezeObject(jr);
@@ -94,6 +94,16 @@ class Styles_Alpha_SortedEntry implements Styles_IWithDate, Styles_IWithName
  */
 class Styles_AlphaImpl
 {
+    public static ProcessEntry(entry: ObjectModel_Entry): string
+    {
+        const that: any = Styles_StandardStyle.Alpha;
+        if (Styles_StandardStyle.EntryTypes.indexOf(entry.Type) >= 0)
+        {
+            return that[entry.Type].call(that, entry) as string;
+        }
+        return that.misc(entry);
+    }
+
     private static MakeLiteral(str: string): Strings_Literal
     {
         const builder = new Strings_LiteralBuilder();
@@ -394,12 +404,7 @@ class Styles_Alpha
         {
             return '';
         }
-        if (Styles_PlainImpl.EntryTypes.indexOf(myEntry.Type) >= 0)
-        {
-            return ((Styles_PlainImpl as any)[myEntry.Type] as Function).
-                call(Styles_PlainImpl, myEntry) as string;
-        }
-        return Styles_PlainImpl.misc(myEntry);
+        return Styles_AlphaImpl.ProcessEntry(myEntry);
     }
 
 }
