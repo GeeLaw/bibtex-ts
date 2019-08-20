@@ -123,6 +123,8 @@ ExportBibTeX._Privates.Styles = (function (ns: any): any
 ns.ResolveYear = Styles_ResolveYear;
 ns.ResolveMonth = Styles_ResolveMonth;
 
+ns.Helper = Styles_Helper;
+
 ns.AlphaImpl = Styles_AlphaImpl;
 ns.Alpha = Styles_Alpha;
 

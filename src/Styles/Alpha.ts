@@ -1,88 +1,29 @@
-type Styles_EntryOrEntryData = ObjectModel_Entry | ObjectModel_EntryData;
 type Styles_Alpha_ReadonlySortedEntry = Readonly<Styles_Alpha_SortedEntry>;
 
-class Styles_Alpha_SortedEntry
+class Styles_Alpha_SortedEntry implements Styles_IWithDate, Styles_IWithName
 {
     public readonly Source: Styles_EntryOrEntryData | undefined;
     public readonly Entry: ObjectModel_Entry | undefined;
     public Nickname: Strings_Literal;
     public NicknameSort: string;
-    public readonly First: string[][];
-    public readonly von: string[][];
-    public readonly Last: string[][];
-    public readonly Jr: string[][];
     public readonly Year: number;
     public readonly Month: number;
+    public readonly First: string[][];
+    public readonly vonLast: string[][];
+    public readonly Jr: string[][];
+    public readonly Title: string[];
     public readonly OriginalIndex: number;
-
-    private static CompareWords(
-        words1: string[], words2: string[]): number
-    {
-        const l1 = words1.length;
-        const l2 = words2.length;
-        for (let i = 0; i !== l1 && i !== l2; ++i)
-        {
-            const n1 = words1[i];
-            const n2 = words2[i];
-            if (n1 < n2)
-            {
-                return -1;
-            }
-            if (n1 > n2)
-            {
-                return 1;
-            }
-        }
-        return l1 < l2 ? -1 : l1 > l2 ? 1 : 0;
-    }
-
-    private static CompareParts(parts1: string[][], parts2: string[][])
-    {
-        const l1 = parts1.length;
-        const l2 = parts2.length;
-        for (let i = 0; i !== l1 && i !== l2; ++i)
-        {
-            const result = Styles_Alpha_SortedEntry.CompareWords(
-                parts1[i], parts2[i]);
-            if (result)
-            {
-                return result;
-            }
-        }
-        return l1 < l2 ? -1 : l1 > l2 ? 1 : 0;
-    }
-
-    private static CompareNumbers(n1: number, n2: number): number
-    {
-        return (n1 != n1
-            ? n2 != n2
-                ? 0 /* n1, n2 are NaN */
-                : 1 /* n1 is NaN; n2 is a number */
-            : n2 != n2
-                ? -1 /* n1 is a number, n2 is NaN */
-            : n1 < n2 ? -1 : n1 > n2 ? 1 : 0);
-    }
-
-    private static CompareStrings(str1: string, str2: string): number
-    {
-        return (str1 === ''
-            ? str2 === '' ? 0 : 1
-            : str2 === '' ? -1
-            : str1 < str2 ? -1 : str1 > str2 ? 1 : 0);
-    }
 
     /**
      * Compares two `SortedEntry` objects within the same series.
      * `Anon` entries are put at the end.
      * 
      * The entries are sorted:
-     * - In alphabetical order of 3-letter (without `+`).
-     * - In increasing order of `year`.
-     * - In increasing order of `month`.
-     * - In increasing order of Last parts of the names.
-     * - In increasing order of von parts of the names.
-     * - In increasing order of Jr parts of the names.
-     * - In increasing order of First parts of the names.
+     * - In alphabetical order of 3-letter (without `+` and
+     *   with `Anon` turned into the empty string).
+     * - In increasing order of date.
+     * - In increasing order of names.
+     * - In increasing order of title.
      * - In original order.
      */
     public static Compare(entry1: Styles_Alpha_ReadonlySortedEntry,
@@ -90,36 +31,19 @@ class Styles_Alpha_SortedEntry
     {
         return (entry1.OriginalIndex === entry2.OriginalIndex
             ? 0
-            : Styles_Alpha_SortedEntry.CompareStrings(
+            : Styles_Helper.CompareStrings(
                 entry1.NicknameSort,
                 entry2.NicknameSort
-            ) || Styles_Alpha_SortedEntry.CompareNumbers(
-                entry1.Year, entry2.Year
-            ) || Styles_Alpha_SortedEntry.CompareNumbers(
-                entry1.Month, entry2.Month
-            ) || Styles_Alpha_SortedEntry.CompareParts(
-                entry1.Last, entry2.Last
-            ) || Styles_Alpha_SortedEntry.CompareParts(
-                entry1.von, entry2.von
-            ) || Styles_Alpha_SortedEntry.CompareParts(
-                entry1.Jr, entry2.Jr
-            ) || Styles_Alpha_SortedEntry.CompareParts(
-                entry1.First, entry2.First
-            ) || Styles_Alpha_SortedEntry.CompareNumbers(
-                entry1.OriginalIndex, entry2.OriginalIndex)
-            );
-    }
-
-    public static LaunderWords(name: ObjectModel_PersonName,
-        target: ObjectModel_PersonNameFormatComponentTarget): string[]
-    {
-        const result: string[] = [];
-        for (const word of name[target])
-        {
-            result.push(
-                Styles_AlphaImpl.purified_uppercase(word));
-        }
-        return Helper.FreezeObject(result);
+            ) || Styles_Helper.CompareDate(
+                entry1, entry2
+            ) || Styles_Helper.CompareNames(
+                entry1, entry2
+            ) || Styles_Helper.CompareWords(
+                entry1.Title, entry2.Title
+            ) || Styles_Helper.CompareNumbers(
+                entry1.OriginalIndex,
+                entry2.OriginalIndex
+            ));
     }
 
     public constructor(
@@ -135,45 +59,30 @@ class Styles_Alpha_SortedEntry
         this.Entry = entry;
         if (entry !== undefined)
         {
-            const last = [], first = [], von = [], jr = [];
-            const people = entry.Fields['author'] || entry.Fields['editor'];
-            for (const person of (people !== undefined
-                ? ObjectModel_ParsePersonNames(people)
-                : []))
-            {
-                if (person.IsEtal())
-                {
-                    continue;
-                }
-                first.push(
-                    Styles_Alpha_SortedEntry.LaunderWords(person, 'First'));
-                von.push(
-                    Styles_Alpha_SortedEntry.LaunderWords(person, 'von'));
-                last.push(
-                    Styles_Alpha_SortedEntry.LaunderWords(person, 'Last'));
-                jr.push(
-                    Styles_Alpha_SortedEntry.LaunderWords(person, 'Jr'));
-            }
+            const first: string[][] = [];
+            const vonLast: string[][] = [];
+            const jr: string[][] = [];
             this.Nickname = Styles_AlphaImpl.format_label_text(entry);
             this.NicknameSort = Styles_AlphaImpl.format_label_sort(entry);
-            this.First = Helper.FreezeObject(first);
-            this.von = Helper.FreezeObject(von);
-            this.Last = Helper.FreezeObject(last);
-            this.Jr = Helper.FreezeObject(jr);
             this.Year = Styles_ResolveYear(entry);
             this.Month = Styles_ResolveMonth(entry);
+            Styles_Helper.CreateSortName(entry, first, vonLast, jr);
+            this.First = Helper.FreezeObject(first);
+            this.vonLast = Helper.FreezeObject(vonLast);
+            this.Jr = Helper.FreezeObject(jr);
+            this.Title = Styles_Helper.ChopWords(entry, 'title');
         }
         else
         {
-            const emptyArray = Helper.FreezeObject([]);
+            const emptyArray = Styles_Helper.EmptyArray;
             this.Nickname = Strings_Literal.Empty;
             this.NicknameSort = '';
-            this.First = emptyArray;
-            this.von = emptyArray;
-            this.Last = emptyArray;
-            this.Jr = emptyArray;
             this.Year = Number.NaN;
             this.Month = Number.NaN;
+            this.First = emptyArray;
+            this.vonLast = emptyArray;
+            this.Jr = emptyArray;
+            this.Title = emptyArray;
         }
         this.OriginalIndex = idx;
     }
@@ -185,142 +94,66 @@ class Styles_Alpha_SortedEntry
  */
 class Styles_AlphaImpl
 {
-    private static sentence(text: string): string
+    private static format_names(
+        people: ObjectModel_PersonName[]): Styles_FormattedNames
     {
-        return (text.length === 0
-            ? ''
-            : /[.?!]\}*$/.test(text)
-            ? text + '\n'
-            : text + '.\n');
-    }
-
-    private static clause(clause1: string, clause2: string): string
-    {
-        return (clause1.length === 0
-            ? clause2
-            : clause2.length === 0
-            ? clause1
-            : clause1 + ', ' + clause2);
-    }
-
-    private static field(entry: ObjectModel_Entry,
-        field: string): Strings_Literal
-    {
-        const presence = entry.Fields[field];
-        return presence || Strings_Literal.Empty;
-    }
-
-    private static emph(text: string): string
-    {
-        return (text.length === 0
-            ? ''
-            : '{\\em ' + text + '}');
-    }
-
-    private static readonly NameFormat =
-        ObjectModel_ParsePersonNameFormat('{ff }{vv~}{ll}{, jj}');
-    private static format_names(people: ObjectModel_PersonName[]): any
-    {
-        const format = this.NameFormat;
-        const result = [];
-        let etal = false;
-        const ret = Helper.NewEmptyObject();
-        for (const person of people)
-        {
-            if (person.IsEtal())
-            {
-                etal = true;
-                continue;
-            }
-            result.push(format.Format(person));
-        }
-        if (result.length === 0)
-        {
-            ret.value = '';
-            ret.count = 0;
-            return ret;
-        }
-        if (etal)
-        {
-            ret.value = (result.length === 1
-                ? result[0] + ' et~al.'
-                : result.join(', ') + ', et~al.');
-            ret.count = result.length + 1;
-            return ret;
-        }
-        if (result.length === 1)
-        {
-            ret.value = result[0];
-            ret.count = 1;
-            return ret;
-        }
-        ret.value = result.slice(0, result.length - 1).join(', ') +
-            (result.length === 2 ? ' and ' : ', and ') +
-            result[result.length - 1];
-        ret.count = result.length;
-        return ret;
+        return Styles_Helper.format_names(
+            Styles_Helper.NameFormat_ffvvlljj,
+            people);
     }
 
     private static format_authors(entry: ObjectModel_Entry): string
     {
         return this.format_names(
             ObjectModel_ParsePersonNames(
-            this.field(entry, 'author'))).value;
+            Styles_Helper.field(entry, 'author'))).Value;
     }
 
     private static format_editors(entry: ObjectModel_Entry): string
     {
         const formatted = this.format_names(
             ObjectModel_ParsePersonNames(
-            this.field(entry, 'editor')));
-        return (formatted.count > 1
-            ? formatted.value + ', editors'
-            : formatted.value === 1
-            ? formatted.value + ', editor'
+            Styles_Helper.field(entry, 'editor')));
+        return (formatted.Count > 1
+            ? formatted.Value + ', editors'
+            : formatted.Count === 1
+            ? formatted.Value + ', editor'
             : '');
     }
 
     private static format_title(entry: ObjectModel_Entry): string
     {
-        return this.field(entry, 'title').Raw;
+        return Styles_Helper.field(entry, 'title').Raw;
     }
 
-    private static n_dashify(text: string): string
-    {
-        return text.replace(/[ \t\v\f\r\n]*-+[ \t\v\f\r\n]*/g, '--');
-    }
-
-    private static readonly MonthNames = [
-        '', 'January', 'February', 'March',
-        'April', 'May', 'June', 'July', 'August',
-        'September', 'October', 'November', 'December'];
     private static format_date(entry: ObjectModel_Entry): string
     {
-        const year = this.field(entry, 'year').Raw;
-        const month = this.field(entry, 'month').Raw;
+        const year = Styles_Helper.field(entry, 'year').Raw;
+        const month = Styles_Helper.field(entry, 'month').Raw;
         const monthNum = Styles_ResolveMonth(entry);
         if (monthNum != monthNum)
         {
             return month.length === 0 ? year : month + ' ' + year;
         }
         return (year.length !== 0
-            ? this.MonthNames[monthNum] + ' ' + year
-            : this.MonthNames[monthNum]);
+            ? Styles_Helper.MonthNamesLong[monthNum] + ' ' + year
+            : Styles_Helper.MonthNamesLong[monthNum]);
     }
 
     private static format_btitle(entry: ObjectModel_Entry): string
     {
-        return this.emph(this.field(entry, 'title').Raw);
+        return Styles_Helper.emph(
+            Styles_Helper.field(entry, 'title').Raw);
     }
 
     private static format_bvolume(entry: ObjectModel_Entry): string
     {
-        const volume = this.field(entry, 'volume').Raw;
+        const volume = Styles_Helper.field(entry, 'volume').Raw;
         if (volume.length === 0)
         {
             return '';
         }
-        const series = this.field(entry, 'series').Raw;
+        const series = Styles_Helper.field(entry, 'series').Raw;
         return 'volume~' + volume + (series.length === 0
             ? ''
             : ' of ' + series);
@@ -329,13 +162,13 @@ class Styles_AlphaImpl
     private static format_number_series(entry: ObjectModel_Entry,
         insentence: boolean): string
     {
-        const volume = this.field(entry, 'volume').Raw;
+        const volume = Styles_Helper.field(entry, 'volume').Raw;
         if (volume.length !== 0)
         {
             return '';
         }
-        const number = this.field(entry, 'number').Raw;
-        const series = this.field(entry, 'series').Raw;
+        const number = Styles_Helper.field(entry, 'number').Raw;
+        const series = Styles_Helper.field(entry, 'series').Raw;
         if (number.length === 0)
         {
             return series;
@@ -346,48 +179,50 @@ class Styles_AlphaImpl
 
     private static format_edition(entry: ObjectModel_Entry)
     {
-        const edition = this.field(entry, 'edition').Raw;
+        const edition = Styles_Helper.field(entry, 'edition').Raw;
         return edition.length !== 0 ? edition + ' edition' : '';
     }
 
     private static format_pages(entry: ObjectModel_Entry): string
     {
-        const pages = this.field(entry, 'pages').Raw;
+        const pages = Styles_Helper.field(entry, 'pages').Raw;
         if (pages.length === 0)
         {
             return '';
         }
         return (/[-,]/.test(pages)
-            ? 'pages ' + this.n_dashify(pages)
+            ? 'pages ' + Styles_Helper.n_dashify(pages)
             : 'page ' + pages);
     }
 
     private static format_vol_num_pages(entry: ObjectModel_Entry): string
     {
-        let result = this.field(entry, 'volume').Raw;
-        const number = this.field(entry, 'number').Raw;
+        let result = Styles_Helper.field(entry, 'volume').Raw;
+        const number = Styles_Helper.field(entry, 'number').Raw;
         if (number.length !== 0)
         {
             result += '(' + number + ')';
         }
-        const pages = this.field(entry, 'pages').Raw;
+        const pages = Styles_Helper.field(entry, 'pages').Raw;
         if (pages.length !== 0)
         {
             result += ':';
-            result += (/[-,]/.test(pages) ? this.n_dashify(pages) : pages);
+            result += (/[-,]/.test(pages)
+                ? Styles_Helper.n_dashify(pages)
+                : pages);
         }
         return result;
     }
 
     private static format_chapter_pages(entry: ObjectModel_Entry)
     {
-        const chapter = this.field(entry, 'chapter').Raw;
+        const chapter = Styles_Helper.field(entry, 'chapter').Raw;
         const pages = this.format_pages(entry);
         if (chapter.length === 0)
         {
             return pages;
         }
-        const type = this.field(entry, 'type');
+        const type = Styles_Helper.field(entry, 'type');
         const myType = (type.Raw.length === 0
             ? 'chapter' : type.ToLowerCase().Raw);
         return myType + ' ' + chapter +
@@ -396,7 +231,7 @@ class Styles_AlphaImpl
 
     private static format_in_ed_booktitle(entry: ObjectModel_Entry): string
     {
-        const booktitle = this.field(entry, 'booktitle').Raw;
+        const booktitle = Styles_Helper.field(entry, 'booktitle').Raw;
         if (booktitle.length === 0)
         {
             return '';
@@ -404,7 +239,7 @@ class Styles_AlphaImpl
         const editors = this.format_editors(entry);
         return 'In ' +
             (editors.length !== 0 ? editors + ', ' : '') +
-            this.emph(booktitle);
+            Styles_Helper.emph(booktitle);
     }
 
     private static readonly MastersThesisType =
@@ -414,7 +249,7 @@ class Styles_AlphaImpl
     private static format_thesis_type(entry: ObjectModel_Entry,
         fallback: Strings_Literal): string
     {
-        const type = this.field(entry, 'type');
+        const type = Styles_Helper.field(entry, 'type');
         const myType = (type.Raw.length === 0 ? fallback : type);
         return myType.ToTitleCase().Raw;
     }
@@ -423,9 +258,9 @@ class Styles_AlphaImpl
         Strings_ParseLiteral('Technical Report').Result;
     private static format_tr_number(entry: ObjectModel_Entry)
     {
-        const type = this.field(entry, 'type');
+        const type = Styles_Helper.field(entry, 'type');
         const myType = (type.Raw.length === 0 ? this.TRType : type);
-        const number = this.field(entry, 'number').Raw;
+        const number = Styles_Helper.field(entry, 'number').Raw;
         if (number.length === 0)
         {
             return myType.ToTitleCase().Raw;
@@ -438,7 +273,7 @@ class Styles_AlphaImpl
     private static format_crossref_editor(entry: ObjectModel_Entry): string
     {
         const people = ObjectModel_ParsePersonNames(
-            this.field(entry, 'editor'));
+            Styles_Helper.field(entry, 'editor'));
         const editors = [];
         let etal = false;
         for (const person of people)
@@ -467,14 +302,14 @@ class Styles_AlphaImpl
 
     private static format_book_crossref(entry: ObjectModel_Entry): string
     {
-        const crossref = this.field(entry, 'crossref').Raw;
-        const volume = this.field(entry, 'volume').Raw;
+        const crossref = Styles_Helper.field(entry, 'crossref').Raw;
+        const volume = Styles_Helper.field(entry, 'volume').Raw;
         let result = (volume.length !== 0
             ? 'Volume~' + volume + ' of' : 'In');
-        const series = this.field(entry, 'series').Raw;
+        const series = Styles_Helper.field(entry, 'series').Raw;
         if (series.length !== 0)
         {
-            result += ' ' + this.emph(series);
+            result += ' ' + Styles_Helper.emph(series);
         }
         else
         {
@@ -491,12 +326,12 @@ class Styles_AlphaImpl
     private static format_incoll_inproc_crossref(
         entry: ObjectModel_Entry): string
     {
-        const crossref = this.field(entry, 'crossref').Raw;
-        const booktitle = this.field(entry, 'booktitle').Raw;
+        const crossref = Styles_Helper.field(entry, 'crossref').Raw;
+        const booktitle = Styles_Helper.field(entry, 'booktitle').Raw;
         let result = 'In';
         if (booktitle.length !== 0)
         {
-            result += ' ' + this.emph(booktitle);
+            result += ' ' + Styles_Helper.emph(booktitle);
         }
         else
         {
@@ -518,200 +353,221 @@ class Styles_AlphaImpl
     public static article(entry: ObjectModel_Entry): string
     {
         let result = '';
-        result += this.sentence(this.format_authors(entry));
-        result += this.sentence(this.format_title(entry));
-        const crossref = this.field(entry, 'crossref').Raw;
+        result += Styles_Helper.sentence(this.format_authors(entry));
+        result += Styles_Helper.sentence(this.format_title(entry));
+        const crossref = Styles_Helper.field(entry, 'crossref').Raw;
         if (crossref.length === 0)
         {
-            let journal = this.emph(this.field(entry, 'journal').Raw);
-            journal = this.clause(journal, this.format_vol_num_pages(entry));
-            journal = this.clause(journal, this.format_date(entry));
-            result += this.sentence(journal);
+            let journal = Styles_Helper.emph(
+                Styles_Helper.field(entry, 'journal').Raw);
+            journal = Styles_Helper.clause(journal,
+                this.format_vol_num_pages(entry));
+            journal = Styles_Helper.clause(journal,
+                this.format_date(entry));
+            result += Styles_Helper.sentence(journal);
         }
         else
         {
             let journal = 'In';
-            const jrnl = this.emph(this.field(entry, 'journal').Raw);
+            const jrnl = Styles_Helper.emph(
+                Styles_Helper.field(entry, 'journal').Raw);
             if (jrnl.length !== 0)
             {
                 journal += ' ' + jrnl;
             }
             journal += '~\\cite{' + crossref + '}';
-            journal = this.clause(journal, this.format_pages(entry));
-            result += this.sentence(journal);
+            journal = Styles_Helper.clause(journal,
+                this.format_pages(entry));
+            result += Styles_Helper.sentence(journal);
         }
-        result += this.sentence(this.field(entry, 'note').Raw);
+        result += Styles_Helper.sentence(
+            Styles_Helper.field(entry, 'note').Raw);
         return result;
     }
 
     public static book(entry: ObjectModel_Entry): string
     {
-        let result = this.sentence(this.format_authors(entry)
+        let result = Styles_Helper.sentence(this.format_authors(entry)
             || this.format_editors(entry));
-        result += this.sentence(this.format_btitle(entry));
+        result += Styles_Helper.sentence(this.format_btitle(entry));
         let crossrefPublisher = undefined;
-        const crossref = this.field(entry, 'crossref').Raw;
+        const crossref = Styles_Helper.field(entry, 'crossref').Raw;
         if (crossref.length !== 0)
         {
             crossrefPublisher = this.format_book_crossref(entry);
         }
         else
         {
-            result += this.sentence(this.format_bvolume(entry));
-            result += this.sentence(this.format_number_series(entry, false));
-            crossrefPublisher = this.clause(
-                this.field(entry, 'publisher').Raw,
-                this.field(entry, 'address').Raw);
+            result += Styles_Helper.sentence(this.format_bvolume(entry));
+            result += Styles_Helper.sentence(
+                this.format_number_series(entry, false));
+            crossrefPublisher = Styles_Helper.clause(
+                Styles_Helper.field(entry, 'publisher').Raw,
+                Styles_Helper.field(entry, 'address').Raw);
         }
-        result += this.sentence(this.clause(
+        result += Styles_Helper.sentence(Styles_Helper.clause(
             crossrefPublisher,
-            this.clause(
+            Styles_Helper.clause(
                 this.format_edition(entry),
                 this.format_date(entry)
             )));
-        result += this.sentence(this.field(entry, 'note').Raw);
+        result += Styles_Helper.sentence(
+            Styles_Helper.field(entry, 'note').Raw);
         return result;
     }
 
     public static booklet(entry: ObjectModel_Entry): string
     {
-        let result = this.sentence(this.format_authors(entry));
+        let result = Styles_Helper.sentence(
+            this.format_authors(entry));
         const howpublishedAddress =
-            this.sentence(this.field(entry, 'howpublished').Raw) +
-            this.sentence(this.field(entry, 'address').Raw);
+            Styles_Helper.sentence(
+                Styles_Helper.field(entry, 'howpublished').Raw) +
+            Styles_Helper.sentence(
+                Styles_Helper.field(entry, 'address').Raw);
         if (howpublishedAddress.length !== 0)
         {
-            result += this.sentence(this.format_title(entry));
+            result += Styles_Helper.sentence(this.format_title(entry));
             result += howpublishedAddress;
-            result += this.sentence(this.format_date(entry));
+            result += Styles_Helper.sentence(this.format_date(entry));
         }
         else
         {
-            result += this.sentence(this.clause(
+            result += Styles_Helper.sentence(Styles_Helper.clause(
                 this.format_title(entry),
                 this.format_date(entry)));
         }
-        result += this.sentence(this.field(entry, 'note').Raw);
+        result += Styles_Helper.sentence(
+            Styles_Helper.field(entry, 'note').Raw);
         return result;
     }
 
     public static inbook(entry: ObjectModel_Entry): string
     {
-        let result = this.sentence(this.format_authors(entry)
+        let result = Styles_Helper.sentence(this.format_authors(entry)
             || this.format_editors(entry));
             let crossrefAddr = undefined;
-            const crossref = this.field(entry, 'crossref').Raw;
+            const crossref = Styles_Helper.field(entry, 'crossref').Raw;
         if (crossref.length !== 0)
         {
-            result += this.sentence(this.clause(
+            result += Styles_Helper.sentence(Styles_Helper.clause(
                 this.format_btitle(entry),
                 this.format_chapter_pages(entry)));
             crossrefAddr = this.format_book_crossref(entry);
         }
         else
         {
-            result += this.sentence(this.clause(this.clause(
+            result += Styles_Helper.sentence(
+                Styles_Helper.clause(Styles_Helper.clause(
                 this.format_btitle(entry),
                 this.format_bvolume(entry)),
                 this.format_chapter_pages(entry)));
-            result += this.sentence(this.format_number_series(entry, false));
-            crossrefAddr = this.clause(
-                this.field(entry, 'howpublished').Raw,
-                this.field(entry, 'address').Raw);
+            result += Styles_Helper.sentence(
+                this.format_number_series(entry, false));
+            crossrefAddr = Styles_Helper.clause(
+                Styles_Helper.field(entry, 'howpublished').Raw,
+                Styles_Helper.field(entry, 'address').Raw);
         }
-        result += this.sentence(this.clause(
+        result += Styles_Helper.sentence(Styles_Helper.clause(
             crossrefAddr,
-            this.clause(
+            Styles_Helper.clause(
                 this.format_edition(entry),
                 this.format_date(entry)
             )));
-        result += this.sentence(this.field(entry, 'note').Raw);
+        result += Styles_Helper.sentence(
+            Styles_Helper.field(entry, 'note').Raw);
         return result;
     }
 
     public static incollection(entry: ObjectModel_Entry): string
     {
-        let result = this.sentence(this.format_authors(entry));
-        result += this.sentence(this.format_title(entry));
-        const crossref = this.field(entry, 'crossref').Raw;
+        let result = Styles_Helper.sentence(this.format_authors(entry));
+        result += Styles_Helper.sentence(this.format_title(entry));
+        const crossref = Styles_Helper.field(entry, 'crossref').Raw;
         if (crossref.length !== 0)
         {
-            result += this.sentence(this.clause(
+            result += Styles_Helper.sentence(Styles_Helper.clause(
                 this.format_incoll_inproc_crossref(entry),
                 this.format_chapter_pages(entry)
             ));
         }
         else
         {
-            const clause1 = this.clause(
+            const clause1 = Styles_Helper.clause(
                 this.format_in_ed_booktitle(entry),
                 this.format_bvolume(entry)
             );
-            const clause2 = this.clause(
+            const clause2 = Styles_Helper.clause(
                 this.format_number_series(entry, clause1.length === 0),
                 this.format_chapter_pages(entry)
             );
-            result += this.sentence(this.clause(clause1, clause2));
-            result += this.sentence(this.clause(
-                this.clause(
-                    this.field(entry, 'howpublished').Raw,
-                    this.field(entry, 'address').Raw
+            result += Styles_Helper.sentence(
+                Styles_Helper.clause(clause1, clause2));
+            result += Styles_Helper.sentence(Styles_Helper.clause(
+                Styles_Helper.clause(
+                    Styles_Helper.field(entry, 'howpublished').Raw,
+                    Styles_Helper.field(entry, 'address').Raw
                 ),
-                this.clause(
+                Styles_Helper.clause(
                     this.format_edition(entry),
                     this.format_date(entry)
                 )
             ));
         }
-        result += this.sentence(this.field(entry, 'note').Raw);
+        result += Styles_Helper.sentence(
+            Styles_Helper.field(entry, 'note').Raw);
         return result;
     }
 
     public static inproceedings(entry: ObjectModel_Entry): string
     {
-        let result = this.sentence(this.format_authors(entry));
-        result += this.sentence(this.format_title(entry));
-        const crossref = this.field(entry, 'crossref').Raw;
+        let result = Styles_Helper.sentence(this.format_authors(entry));
+        result += Styles_Helper.sentence(this.format_title(entry));
+        const crossref = Styles_Helper.field(entry, 'crossref').Raw;
         if (crossref.length !== 0)
         {
-            result += this.sentence(this.clause(
+            result += Styles_Helper.sentence(Styles_Helper.clause(
                 this.format_incoll_inproc_crossref(entry),
                 this.format_pages(entry)
             ));
         }
         else
         {
-            const clause1 = this.clause(
+            const clause1 = Styles_Helper.clause(
                 this.format_in_ed_booktitle(entry),
                 this.format_bvolume(entry)
             );
-            const clause2 = this.clause(
+            const clause2 = Styles_Helper.clause(
                 this.format_number_series(entry, clause1.length === 0),
                 this.format_pages(entry)
             );
-            const clause12 = this.clause(clause1, clause2);
-            const orgpub = this.clause(
-                this.field(entry, 'organization').Raw,
-                this.field(entry, 'publisher').Raw);
+            const clause12 = Styles_Helper.clause(clause1, clause2);
+            const orgpub = Styles_Helper.clause(
+                Styles_Helper.field(entry, 'organization').Raw,
+                Styles_Helper.field(entry, 'publisher').Raw);
             const date = this.format_date(entry);
-            const address = this.field(entry, 'address').Raw;
+            const address = Styles_Helper.field(entry, 'address').Raw;
             if (address.length !== 0)
             {
-                result += this.sentence(this.clause(clause12,
-                    this.clause(address, date)));
-                result += this.sentence(orgpub);
+                result += Styles_Helper.sentence(Styles_Helper.clause(
+                    clause12,
+                    Styles_Helper.clause(address, date)));
+                result += Styles_Helper.sentence(orgpub);
             }
             else if (orgpub.length !== 0)
             {
-                result += this.sentence(clause12);
-                result += this.sentence(this.clause(orgpub, date));
+                result += Styles_Helper.sentence(clause12);
+                result += Styles_Helper.sentence(
+                    Styles_Helper.clause(orgpub, date));
             }
             else
             {
-                result += this.sentence(this.clause(clause12, date));
+                result += Styles_Helper.sentence(
+                    Styles_Helper.clause(clause12, date));
             }
         }
-        result += this.sentence(this.field(entry, 'note').Raw);
+        result += Styles_Helper.sentence(
+            Styles_Helper.field(entry, 'note').Raw);
         return result;
     }
 
@@ -723,49 +579,54 @@ class Styles_AlphaImpl
     public static manual(entry: ObjectModel_Entry): string
     {
         const authors = this.format_authors(entry);
-        const org = this.field(entry, 'organization').Raw;
-        const addr = this.field(entry, 'address').Raw;
-        let result = this.sentence(authors);
+        const org = Styles_Helper.field(entry, 'organization').Raw;
+        const addr = Styles_Helper.field(entry, 'address').Raw;
+        let result = Styles_Helper.sentence(authors);
         if (authors.length === 0 && org.length !== 0)
         {
-            result = this.sentence(this.clause(org, addr));
+            result = Styles_Helper.sentence(
+                Styles_Helper.clause(org, addr));
         }
         let midsentence = this.format_btitle(entry);
         if (authors.length === 0)
         {
             if (org.length === 0)
             {
-                midsentence = this.clause(midsentence, addr);
+                midsentence = Styles_Helper.clause(midsentence, addr);
             }
         }
         else if (org.length !== 0 || addr.length !== 0)
         {
-            result += this.sentence(midsentence);
-            midsentence = this.clause(org, addr);
+            result += Styles_Helper.sentence(midsentence);
+            midsentence = Styles_Helper.clause(org, addr);
         }
-        midsentence = this.clause(midsentence, this.format_edition(entry));
-        midsentence = this.clause(midsentence, this.format_date(entry));
-        result += this.sentence(midsentence);
-        result += this.sentence(this.field(entry, 'note').Raw);
+        midsentence = Styles_Helper.clause(midsentence,
+            this.format_edition(entry));
+        midsentence = Styles_Helper.clause(midsentence,
+            this.format_date(entry));
+        result += Styles_Helper.sentence(midsentence);
+        result += Styles_Helper.sentence(
+            Styles_Helper.field(entry, 'note').Raw);
         return result;
     }
 
     private static thesis(entry: ObjectModel_Entry,
         fallback: Strings_Literal): string
     {
-        let result = this.sentence(this.format_authors(entry));
-        result += this.sentence(this.format_title(entry));
-        result += this.sentence(this.clause(
-            this.clause(
+        let result = Styles_Helper.sentence(this.format_authors(entry));
+        result += Styles_Helper.sentence(this.format_title(entry));
+        result += Styles_Helper.sentence(Styles_Helper.clause(
+            Styles_Helper.clause(
                 this.format_thesis_type(entry, fallback),
-                this.field(entry, 'school').Raw
+                Styles_Helper.field(entry, 'school').Raw
             ),
-            this.clause(
-                this.field(entry, 'address').Raw,
+            Styles_Helper.clause(
+                Styles_Helper.field(entry, 'address').Raw,
                 this.format_date(entry)
             )
         ));
-        result += this.sentence(this.field(entry, 'note').Raw);
+        result += Styles_Helper.sentence(
+            Styles_Helper.field(entry, 'note').Raw);
         return result;
     }
 
@@ -776,12 +637,13 @@ class Styles_AlphaImpl
 
     public static misc(entry: ObjectModel_Entry): string
     {
-        let result = this.sentence(this.format_authors(entry));
-        result += this.sentence(this.format_title(entry));
-        result += this.sentence(this.clause(
-            this.field(entry, 'howpublished').Raw,
+        let result = Styles_Helper.sentence(this.format_authors(entry));
+        result += Styles_Helper.sentence(this.format_title(entry));
+        result += Styles_Helper.sentence(Styles_Helper.clause(
+            Styles_Helper.field(entry, 'howpublished').Raw,
             this.format_date(entry)));
-        result += this.sentence(this.field(entry, 'note').Raw);
+        result += Styles_Helper.sentence(
+            Styles_Helper.field(entry, 'note').Raw);
         return result;
     }
 
@@ -793,58 +655,63 @@ class Styles_AlphaImpl
     public static proceedings(entry: ObjectModel_Entry): string
     {
         const editors = this.format_editors(entry);
-        const org = this.field(entry, 'organization').Raw;
-        let result = this.sentence(editors || org);
-        const btbv = this.clause(
+        const org = Styles_Helper.field(entry, 'organization').Raw;
+        let result = Styles_Helper.sentence(editors || org);
+        const btbv = Styles_Helper.clause(
             this.format_btitle(entry),
             this.format_bvolume(entry));
         const ns = this.format_number_series(entry, btbv.length === 0);
-        const addr = this.field(entry, 'address').Raw;
+        const addr = Styles_Helper.field(entry, 'address').Raw;
         const date = this.format_date(entry);
-        const pub = this.field(entry, 'publisher').Raw;
+        const pub = Styles_Helper.field(entry, 'publisher').Raw;
         if (addr.length !== 0)
         {
-            result += this.sentence(this.clause(
-                this.clause(btbv, ns),
-                this.clause(addr, date)));
-            result += this.sentence(this.clause(
+            result += Styles_Helper.sentence(Styles_Helper.clause(
+                Styles_Helper.clause(btbv, ns),
+                Styles_Helper.clause(addr, date)));
+            result += Styles_Helper.sentence(Styles_Helper.clause(
                 editors.length !== 0 ? org : '', pub));
         }
         else
         {
-            const orgpub = (editors.length === 0 ? this.clause(org, pub) : pub);
-            result += this.sentence(this.clause(
-                this.clause(btbv, ns),
-                this.clause(orgpub, date)));
+            const orgpub = (editors.length === 0
+                ? Styles_Helper.clause(org, pub)
+                : pub);
+            result += Styles_Helper.sentence(Styles_Helper.clause(
+                Styles_Helper.clause(btbv, ns),
+                Styles_Helper.clause(orgpub, date)));
         }
-        result += this.sentence(this.field(entry, 'note').Raw);
+        result += Styles_Helper.sentence(
+            Styles_Helper.field(entry, 'note').Raw);
         return result;
     }
 
     public static techreport(entry: ObjectModel_Entry): string
     {
-        let result = this.sentence(this.format_authors(entry));
-        result += this.sentence(this.format_title(entry));
-        result += this.sentence(this.clause(
-            this.clause(
+        let result = Styles_Helper.sentence(this.format_authors(entry));
+        result += Styles_Helper.sentence(this.format_title(entry));
+        result += Styles_Helper.sentence(Styles_Helper.clause(
+            Styles_Helper.clause(
                 this.format_tr_number(entry),
-                this.field(entry, 'institution').Raw
+                Styles_Helper.field(entry, 'institution').Raw
             ),
-            this.clause(
-                this.field(entry, 'address').Raw,
+            Styles_Helper.clause(
+                Styles_Helper.field(entry, 'address').Raw,
                 this.format_date(entry)
             )
         ));
-        result += this.sentence(this.field(entry, 'note').Raw);
+        result += Styles_Helper.sentence(
+            Styles_Helper.field(entry, 'note').Raw);
         return result;
     }
 
     public static unpublished(entry: ObjectModel_Entry): string
     {
-        let result = this.sentence(this.format_authors(entry));
-        result += this.sentence(this.format_title(entry));
-        result += this.sentence(this.format_date(entry));
-        result += this.sentence(this.field(entry, 'note').Raw);
+        let result = Styles_Helper.sentence(this.format_authors(entry));
+        result += Styles_Helper.sentence(this.format_title(entry));
+        result += Styles_Helper.sentence(this.format_date(entry));
+        result += Styles_Helper.sentence(
+            Styles_Helper.field(entry, 'note').Raw);
         return result;
     }
 
@@ -976,13 +843,6 @@ class Styles_AlphaImpl
             this.format_label_year(entry)]);
     }
 
-    public static purified_uppercase(
-        text: Strings_Literal): string
-    {
-        return text.Purified.replace(/[a-z]+/g,
-            function (x) { return x.toUpperCase(); });
-    }
-
     public static format_label_sort(entry: ObjectModel_Entry): string
     {
         const namestring = entry.Fields['author'] ||
@@ -992,7 +852,7 @@ class Styles_AlphaImpl
             const key = entry.Fields['key'];
             if (key !== undefined)
             {
-                return this.purified_uppercase(key.Prefix(3));
+                return Styles_Helper.purified_uppercase(key.Prefix(3));
             }
             return '';
         }
@@ -1028,7 +888,7 @@ class Styles_AlphaImpl
         {
             vls = vls.slice(0, 3);
         }
-        return this.purified_uppercase(
+        return Styles_Helper.purified_uppercase(
             Strings_Literal.Concat(vls));
     }
 
