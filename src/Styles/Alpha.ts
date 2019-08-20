@@ -236,51 +236,8 @@ class Styles_AlphaImpl
 
     public static format_label_sort(entry: ObjectModel_Entry): string
     {
-        const namestring = entry.Fields['author'] ||
-            entry.Fields['editor'];
-        if (namestring === undefined)
-        {
-            const key = entry.Fields['key'];
-            if (key !== undefined)
-            {
-                return Styles_Helper.purified_uppercase(key.Prefix(3));
-            }
-            return '';
-        }
-        const people = ObjectModel_ParsePersonNames(namestring);
-        let ll = undefined;
-        let vls = [];
-        for (const person of people)
-        {
-            if (person.IsEtal())
-            {
-                continue;
-            }
-            const vl = this.format_name_vl(person);
-            if (vl.Length === 0)
-            {
-                continue;
-            }
-            vls.push(vl);
-            if (vls.length === 1)
-            {
-                ll = this.format_name_ll(person);
-            }
-        }
-        if (vls.length === 0)
-        {
-            return '';
-        }
-        if (vls.length === 1)
-        {
-            vls[0] = ll!;
-        }
-        else if (vls.length > 4)
-        {
-            vls = vls.slice(0, 3);
-        }
         return Styles_Helper.purified_uppercase(
-            Strings_Literal.Concat(vls));
+            this.format_label_names(entry));
     }
 
     private static readonly NicknameSuffix =
