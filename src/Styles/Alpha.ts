@@ -94,6 +94,15 @@ class Styles_Alpha_SortedEntry implements Styles_IWithDate, Styles_IWithName
  */
 class Styles_AlphaImpl
 {
+    private static MakeLiteral(str: string): Strings_Literal
+    {
+        const builder = new Strings_LiteralBuilder();
+        builder.AddBasicPiece(new Strings_BasicPiece(
+            new Strings_BasicPieceBuilder(str)
+        ));
+        return new Strings_Literal(builder);
+    }
+
     private static format_name_vl(
         name: ObjectModel_PersonName): Strings_Literal
     {
@@ -112,7 +121,6 @@ class Styles_AlphaImpl
                 builder.AddPiece(piece);
             }
         }
-        builder.PushLeftover();
         return new Strings_Literal(builder);
     }
 
@@ -135,9 +143,14 @@ class Styles_AlphaImpl
     }
 
     private static readonly AnonName =
-        Strings_ParseLiteral('Anon').Result;
-    private static readonly EtalChar =
-        Strings_ParseLiteral('{\\etalchar{+}}').Result;
+        Styles_AlphaImpl.MakeLiteral('Anon');
+    private static readonly EtalChar = (function (builder)
+    {
+        builder.AddSpCharPiece(new Strings_SpCharPiece(
+            new Strings_SpCharPieceBuilder('\\etalchar{+}')
+        ));
+        return new Strings_Literal(builder);
+    })(new Strings_LiteralBuilder());
     private static format_label_names(entry: ObjectModel_Entry): Strings_Literal
     {
         let etal: boolean = false;
@@ -206,13 +219,12 @@ class Styles_AlphaImpl
         }
         if (year < 10)
         {
-            return Strings_ParseLiteral(
-                year.toString()).Result;
+            return this.MakeLiteral(year.toString());
         }
         year %= 100;
-        return Strings_ParseLiteral(year < 10
+        return this.MakeLiteral(year < 10
             ? '0' + year.toString()
-            : year.toString()).Result;
+            : year.toString());
     }
 
     public static format_label_text(entry: ObjectModel_Entry): Strings_Literal
@@ -273,56 +285,56 @@ class Styles_AlphaImpl
 
     private static readonly NicknameSuffix =
     [
-        Strings_ParseLiteral('a').Result,
-        Strings_ParseLiteral('b').Result,
-        Strings_ParseLiteral('c').Result,
-        Strings_ParseLiteral('d').Result,
-        Strings_ParseLiteral('e').Result,
-        Strings_ParseLiteral('f').Result,
-        Strings_ParseLiteral('g').Result,
-        Strings_ParseLiteral('h').Result,
-        Strings_ParseLiteral('i').Result,
-        Strings_ParseLiteral('j').Result,
-        Strings_ParseLiteral('k').Result,
-        Strings_ParseLiteral('l').Result,
-        Strings_ParseLiteral('m').Result,
-        Strings_ParseLiteral('n').Result,
-        Strings_ParseLiteral('o').Result,
-        Strings_ParseLiteral('p').Result,
-        Strings_ParseLiteral('q').Result,
-        Strings_ParseLiteral('r').Result,
-        Strings_ParseLiteral('s').Result,
-        Strings_ParseLiteral('t').Result,
-        Strings_ParseLiteral('u').Result,
-        Strings_ParseLiteral('v').Result,
-        Strings_ParseLiteral('w').Result,
-        Strings_ParseLiteral('x').Result,
-        Strings_ParseLiteral('y').Result,
-        Strings_ParseLiteral('z').Result,
-        Strings_ParseLiteral('α').Result,
-        Strings_ParseLiteral('β').Result,
-        Strings_ParseLiteral('γ').Result,
-        Strings_ParseLiteral('δ').Result,
-        Strings_ParseLiteral('ε').Result,
-        Strings_ParseLiteral('ζ').Result,
-        Strings_ParseLiteral('η').Result,
-        Strings_ParseLiteral('θ').Result,
-        Strings_ParseLiteral('ι').Result,
-        Strings_ParseLiteral('κ').Result,
-        Strings_ParseLiteral('λ').Result,
-        Strings_ParseLiteral('μ').Result,
-        Strings_ParseLiteral('ξ').Result,
-        Strings_ParseLiteral('π').Result,
-        Strings_ParseLiteral('ρ').Result,
-        Strings_ParseLiteral('σ').Result,
-        Strings_ParseLiteral('τ').Result,
-        Strings_ParseLiteral('φ').Result,
-        Strings_ParseLiteral('χ').Result,
-        Strings_ParseLiteral('ψ').Result,
-        Strings_ParseLiteral('ω').Result
+        Styles_AlphaImpl.MakeLiteral('a'),
+        Styles_AlphaImpl.MakeLiteral('b'),
+        Styles_AlphaImpl.MakeLiteral('c'),
+        Styles_AlphaImpl.MakeLiteral('d'),
+        Styles_AlphaImpl.MakeLiteral('e'),
+        Styles_AlphaImpl.MakeLiteral('f'),
+        Styles_AlphaImpl.MakeLiteral('g'),
+        Styles_AlphaImpl.MakeLiteral('h'),
+        Styles_AlphaImpl.MakeLiteral('i'),
+        Styles_AlphaImpl.MakeLiteral('j'),
+        Styles_AlphaImpl.MakeLiteral('k'),
+        Styles_AlphaImpl.MakeLiteral('l'),
+        Styles_AlphaImpl.MakeLiteral('m'),
+        Styles_AlphaImpl.MakeLiteral('n'),
+        Styles_AlphaImpl.MakeLiteral('o'),
+        Styles_AlphaImpl.MakeLiteral('p'),
+        Styles_AlphaImpl.MakeLiteral('q'),
+        Styles_AlphaImpl.MakeLiteral('r'),
+        Styles_AlphaImpl.MakeLiteral('s'),
+        Styles_AlphaImpl.MakeLiteral('t'),
+        Styles_AlphaImpl.MakeLiteral('u'),
+        Styles_AlphaImpl.MakeLiteral('v'),
+        Styles_AlphaImpl.MakeLiteral('w'),
+        Styles_AlphaImpl.MakeLiteral('x'),
+        Styles_AlphaImpl.MakeLiteral('y'),
+        Styles_AlphaImpl.MakeLiteral('z'),
+        Styles_AlphaImpl.MakeLiteral('α'),
+        Styles_AlphaImpl.MakeLiteral('β'),
+        Styles_AlphaImpl.MakeLiteral('γ'),
+        Styles_AlphaImpl.MakeLiteral('δ'),
+        Styles_AlphaImpl.MakeLiteral('ε'),
+        Styles_AlphaImpl.MakeLiteral('ζ'),
+        Styles_AlphaImpl.MakeLiteral('η'),
+        Styles_AlphaImpl.MakeLiteral('θ'),
+        Styles_AlphaImpl.MakeLiteral('ι'),
+        Styles_AlphaImpl.MakeLiteral('κ'),
+        Styles_AlphaImpl.MakeLiteral('λ'),
+        Styles_AlphaImpl.MakeLiteral('μ'),
+        Styles_AlphaImpl.MakeLiteral('ξ'),
+        Styles_AlphaImpl.MakeLiteral('π'),
+        Styles_AlphaImpl.MakeLiteral('ρ'),
+        Styles_AlphaImpl.MakeLiteral('σ'),
+        Styles_AlphaImpl.MakeLiteral('τ'),
+        Styles_AlphaImpl.MakeLiteral('φ'),
+        Styles_AlphaImpl.MakeLiteral('χ'),
+        Styles_AlphaImpl.MakeLiteral('ψ'),
+        Styles_AlphaImpl.MakeLiteral('ω')
     ];
     private static readonly NicknameConnector =
-        Strings_ParseLiteral('-').Result;
+        Styles_AlphaImpl.MakeLiteral('-');
 
     public static fix_nicknames(
         entries: Styles_Alpha_SortedEntry[]): void
