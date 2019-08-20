@@ -70,6 +70,8 @@ class Styles_Helper
 
     public static readonly NameFormat_ffvvlljj =
         ObjectModel_ParsePersonNameFormat('{ff }{vv~}{ll}{, jj}');
+    public static readonly NameFormat_fvvlljj =
+        ObjectModel_ParsePersonNameFormat('{f.~}{vv~}{ll}{, jj}');
     public static format_names(format: ObjectModel_PersonNameFormat,
         people: ObjectModel_PersonName[]): Styles_FormattedNames
     {
@@ -109,6 +111,10 @@ class Styles_Helper
         '', 'January', 'February', 'March',
         'April', 'May', 'June', 'July', 'August',
         'September', 'October', 'November', 'December']);
+    public static readonly MonthNamesShort = Helper.FreezeObject([
+        '', 'Jan.', 'Feb.', 'Mar.',
+        'Apr.', 'May', 'June', 'July', 'Aug.',
+        'Sept.', 'Oct.', 'Nov.', 'Dec.']);
 
     public static n_dashify(text: string): string
     {

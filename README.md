@@ -9,4 +9,4 @@ It would be amazing if you find it useful.
 ## To-Dos
 
 - [ ] Add tests.
-- [ ] Implement `abbrv`, `acm`, `apalike`, `plain` and `siam`. Note that `ieeetr` and `unsrt` are not implementable unless we introduce body-dependent sorting.
+- [ ] Implement `acm`, `apalike`, and `siam`. Note that `ieeetr` and `unsrt` are not implementable unless we introduce body-dependent sorting.

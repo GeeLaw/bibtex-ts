@@ -115,6 +115,7 @@ ns.ResolveMonth = Styles_ResolveMonth;
 
 ns.Alpha = Styles_Alpha;
 ns.Plain = Styles_Plain;
+ns.Abbrv = Styles_Abbrv;
 
 return ns;
 })(Helper.NewEmptyObject());
@@ -125,12 +126,17 @@ ns.ResolveYear = Styles_ResolveYear;
 ns.ResolveMonth = Styles_ResolveMonth;
 
 ns.Helper = Styles_Helper;
+ns.StandardStyleHelper = Styles_StandardStyleHelper;
+ns.StandardStyle = Styles_StandardStyle;
 
 ns.AlphaImpl = Styles_AlphaImpl;
 ns.Alpha = Styles_Alpha;
 
 ns.PlainImpl = Styles_PlainImpl;
 ns.Plain = Styles_Plain;
+
+ns.AbbrvImpl = Styles_AbbrvImpl;
+ns.Abbrv = Styles_Abbrv;
 
 return ns;
 })(Helper.NewEmptyObject());

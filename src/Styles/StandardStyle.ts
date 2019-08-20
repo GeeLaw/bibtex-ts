@@ -6,11 +6,12 @@ class Styles_StandardStyleHelper
     public constructor(abbrv: boolean)
     {
         this.NameFormat = (abbrv
-            ? Styles_Helper.NameFormat_ffvvlljj
+            ? Styles_Helper.NameFormat_fvvlljj
             : Styles_Helper.NameFormat_ffvvlljj);
         this.MonthNames = (abbrv
-            ? Styles_Helper.MonthNamesLong
+            ? Styles_Helper.MonthNamesShort
             : Styles_Helper.MonthNamesLong);
+        Helper.FreezeObject(this);
     }
 
     public format_names(
@@ -301,6 +302,7 @@ class Styles_StandardStyle
     private constructor(abbrv: boolean)
     {
         this.that = new Styles_StandardStyleHelper(abbrv);
+        Helper.FreezeObject(this);
     }
 
     public static readonly EntryTypes = ['article', 'book',
