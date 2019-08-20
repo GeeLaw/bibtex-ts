@@ -303,7 +303,7 @@ class Styles_AlphaImpl
     private static readonly NicknameConnector =
         Styles_AlphaImpl.MakeLiteral('-');
 
-    public static fix_nicknames(
+    public static FixNicknames(
         entries: Styles_Alpha_SortedEntry[]): void
     {
         const name1: any = Helper.NewEmptyObject();
@@ -374,7 +374,7 @@ class Styles_Alpha
             }
         }
         result.sort(Styles_Alpha_SortedEntry.Compare);
-        Styles_AlphaImpl.fix_nicknames(result);
+        Styles_AlphaImpl.FixNicknames(result);
         for (const item of result)
         {
             Helper.FreezeObject(item);

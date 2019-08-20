@@ -13,10 +13,10 @@ class Styles_AbbrvImpl
         return that.misc(entry);
     }
 
-    public static fix_nicknames(
+    public static FixNicknames(
         entries: Styles_Abbrv_SortedEntry[]): void
     {
-        return Styles_PlainImpl.fix_nicknames(entries);
+        return Styles_PlainImpl.FixNicknames(entries);
     }
 }
 
@@ -38,7 +38,7 @@ class Styles_Abbrv
             }
         }
         result.sort(Styles_Plain_SortedEntry.Compare);
-        Styles_AbbrvImpl.fix_nicknames(result);
+        Styles_AbbrvImpl.FixNicknames(result);
         for (const item of result)
         {
             Helper.FreezeObject(item);

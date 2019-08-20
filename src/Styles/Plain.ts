@@ -95,7 +95,7 @@ class Styles_PlainImpl
         return that.misc(entry);
     }
 
-    public static fix_nicknames(
+    public static FixNicknames(
         entries: Styles_Plain_SortedEntry[]): void
     {
         let i = 0;
@@ -128,7 +128,7 @@ class Styles_Plain
             }
         }
         result.sort(Styles_Plain_SortedEntry.Compare);
-        Styles_PlainImpl.fix_nicknames(result);
+        Styles_PlainImpl.FixNicknames(result);
         for (const item of result)
         {
             Helper.FreezeObject(item);
