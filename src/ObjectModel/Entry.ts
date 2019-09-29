@@ -78,7 +78,8 @@ class ObjectModel_EntryDataPrivates
     /**
      * Implements `EntryData.Resolve`.
      */
-    public Resolve(refresh?: boolean): ObjectModel_Entry
+    public Resolve(macros?: ObjectModel_StrLitDict,
+        refresh?: boolean): ObjectModel_Entry
     {
         if (this.Resolving)
         {
@@ -96,7 +97,8 @@ class ObjectModel_EntryDataPrivates
                 const resultFields = result.Fields;
                 for (const field in fields)
                 {
-                    resultFields[field] = fields[field]!.Resolve(refresh);
+                    resultFields[field] =
+                        fields[field]!.Resolve(macros, refresh);
                 }
                 const crossref = resultFields['crossref'];
                 if (crossref !== undefined)
@@ -104,7 +106,7 @@ class ObjectModel_EntryDataPrivates
                     const parent = this.ofKey[crossref.Raw];
                     if (parent !== undefined)
                     {
-                        const parentResolved = parent.Resolve(refresh);
+                        const parentResolved = parent.Resolve(macros, refresh);
                         const parentFields = parentResolved.Fields;
                         for (const field in parentFields)
                         {
@@ -184,11 +186,13 @@ class ObjectModel_EntryData
     /**
      * Resolves `EntryData` into `Entry`.
      * 
+     * @param macros  The macros.
      * @param refresh Whether the cache should be discarded.
      */
-    public Resolve(refresh?: boolean): ObjectModel_Entry
+    public Resolve(macros?: ObjectModel_StrLitDict,
+        refresh?: boolean): ObjectModel_Entry
     {
-        return this._MutablePrivates.Resolve(refresh);
+        return this._MutablePrivates.Resolve(macros, refresh);
     }
 
     /**

@@ -46,7 +46,8 @@ class ObjectModel_StringRefPrivates
     /**
      * Implements `StringRef.Resolve`.
      */
-    public Resolve(refresh?: boolean): Strings_Literal
+    public Resolve(macros?: ObjectModel_StrLitDict,
+        refresh?: boolean): Strings_Literal
     {
         if (this.Resolving)
         {
@@ -58,10 +59,19 @@ class ObjectModel_StringRefPrivates
             {
                 this.Resolving = true;
                 this.Resolved = Strings_Literal.Empty;
-                const referee = this.Owner.Dictionary[this.Owner.Referee];
-                if (referee instanceof ObjectModel_StringExpr)
+                const referee = this.Owner.Referee;
+                const stringReferee = this.Owner.Dictionary[referee];
+                if (stringReferee instanceof ObjectModel_StringExpr)
                 {
-                    this.Resolved = referee.Resolve(refresh);
+                    this.Resolved = stringReferee.Resolve(macros, refresh);
+                }
+                if (macros)
+                {
+                    const macroReferee = macros[referee];
+                    if (macroReferee instanceof Strings_Literal)
+                    {
+                        this.Resolved = macroReferee;
+                    }
                 }
             }
             finally
@@ -124,14 +134,16 @@ class ObjectModel_StringRef
      * An empty result is returned if resolution is in progress.
      * This avoids infinite recursion in case of cyclic dependency.
      * 
+     * @param macros  The macros.
      * @param refresh Whether the cache should be invalidated.
      * 
      * @returns The `Literal` that would have been parsed
      *          had the referenced string been equivalently written
      *          as a literal string.
      */
-    public Resolve(refresh?: boolean): Strings_Literal
+    public Resolve(macros?: ObjectModel_StrLitDict,
+        refresh?: boolean): Strings_Literal
     {
-        return this._MutablePrivates.Resolve(refresh);
+        return this._MutablePrivates.Resolve(macros, refresh);
     }
 }

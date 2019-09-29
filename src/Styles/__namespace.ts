@@ -6,12 +6,8 @@
  *          parsed as an integer between -999999 and 999999;
  *          `NaN` otherwise.
  */
-function Styles_ResolveYear(entry: Styles_EntryOrEntryData): number
+function Styles_ResolveYear(entry: ObjectModel_Entry): number
 {
-    if (entry instanceof ObjectModel_EntryData)
-    {
-        entry = entry.Resolve();
-    }
     if (!(entry instanceof ObjectModel_Entry))
     {
         return Number.NaN;
@@ -60,18 +56,18 @@ function Styles_ResolveYear(entry: Styles_EntryOrEntryData): number
 const Styles_MonthTranslator =
 [
     [],
-    ['01', 'jan', '1', 'january'],
-    ['02', 'feb', '2', 'february'],
-    ['03', 'mar', '3', 'march'],
-    ['04', 'apr', '4', 'april'],
+    ['01', 'jan', 'jan.', '1', 'january'],
+    ['02', 'feb', 'feb.', '2', 'february'],
+    ['03', 'mar', 'mar.', '3', 'march'],
+    ['04', 'apr', 'apr.', '4', 'april'],
     ['05', 'may', '5'],
-    ['06', 'jun', '6', 'june'],
-    ['07', 'jul', '7', 'july'],
-    ['08', 'aug', '8', 'august'],
-    ['09', 'sep', '9', 'sept', 'september'],
-    ['10', 'oct', 'october'],
-    ['11', 'nov', 'november'],
-    ['12', 'dec', 'december'],
+    ['06', 'jun', 'jun.', '6', 'june'],
+    ['07', 'jul', 'jul.', '7', 'july'],
+    ['08', 'aug', 'aug.', '8', 'august'],
+    ['09', 'sep', 'sep.', '9', 'sept', 'sept.', 'september'],
+    ['10', 'oct', 'oct.', 'october'],
+    ['11', 'nov', 'nov.', 'november'],
+    ['12', 'dec', 'dec.', 'december'],
 ];
 
 /**
@@ -81,12 +77,8 @@ const Styles_MonthTranslator =
  * @returns The month as an integer (1 to 12) if `month` is present
  *          and can be parsed; `NaN` otherwise.
  */
-function Styles_ResolveMonth(entry: Styles_EntryOrEntryData): number
+function Styles_ResolveMonth(entry: ObjectModel_Entry): number
 {
-    if (entry instanceof ObjectModel_EntryData)
-    {
-        entry = entry.Resolve();
-    }
     if (!(entry instanceof ObjectModel_Entry))
     {
         return Number.NaN;

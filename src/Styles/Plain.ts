@@ -42,11 +42,12 @@ class Styles_Plain_SortedEntry implements Styles_IWithName, Styles_IWithDate
 
     public constructor(abbrv: boolean,
         src: Styles_EntryOrEntryData | undefined,
-        idx: number)
+        idx: number,
+        macros: ObjectModel_StrLitDict)
     {
         this.Source = src;
         const entry = (src instanceof ObjectModel_EntryData
-            ? src.Resolve()
+            ? src.Resolve(macros)
             : src instanceof ObjectModel_Entry
             ? src
             : undefined);
@@ -114,6 +115,43 @@ class Styles_Plain
 {
     public static readonly SortedEntry = Styles_Plain_SortedEntry;
 
+    public static readonly Macros: ObjectModel_StrLitDict = (function (obj)
+    {
+        obj['jan'] = Strings_ParseLiteral('January').Result;
+        obj['feb'] = Strings_ParseLiteral('February').Result;
+        obj['mar'] = Strings_ParseLiteral('March').Result;
+        obj['apr'] = Strings_ParseLiteral('April').Result;
+        obj['may'] = Strings_ParseLiteral('May').Result;
+        obj['jun'] = Strings_ParseLiteral('June').Result;
+        obj['jul'] = Strings_ParseLiteral('July').Result;
+        obj['aug'] = Strings_ParseLiteral('August').Result;
+        obj['sep'] = Strings_ParseLiteral('September').Result;
+        obj['oct'] = Strings_ParseLiteral('October').Result;
+        obj['nov'] = Strings_ParseLiteral('November').Result;
+        obj['dec'] = Strings_ParseLiteral('December').Result;
+        obj['acmcs'] = Strings_ParseLiteral('ACM Computing Surveys').Result;
+        obj['acta'] = Strings_ParseLiteral('Acta Informatica').Result;
+        obj['cacm'] = Strings_ParseLiteral('Communications of the ACM').Result;
+        obj['ibmjrd'] = Strings_ParseLiteral('IBM Journal of Research and Development').Result;
+        obj['ibmsj'] = Strings_ParseLiteral('IBM Systems Journal').Result;
+        obj['ieeese'] = Strings_ParseLiteral('IEEE Transactions on Software Engineering').Result;
+        obj['ieeetc'] = Strings_ParseLiteral('IEEE Transactions on Computers').Result;
+        obj['ieeetcad'] = Strings_ParseLiteral('IEEE Transactions on Computer-Aided Design of Integrated Circuits').Result;
+        obj['ipl'] = Strings_ParseLiteral('Information Processing Letters').Result;
+        obj['jacm'] = Strings_ParseLiteral('Journal of the ACM').Result;
+        obj['jcss'] = Strings_ParseLiteral('Journal of Computer and System Sciences').Result;
+        obj['scp'] = Strings_ParseLiteral('Science of Computer Programming').Result;
+        obj['sicomp'] = Strings_ParseLiteral('SIAM Journal on Computing').Result;
+        obj['tocs'] = Strings_ParseLiteral('ACM Transactions on Computer Systems').Result;
+        obj['tods'] = Strings_ParseLiteral('ACM Transactions on Database Systems').Result;
+        obj['tog'] = Strings_ParseLiteral('ACM Transactions on Graphics').Result;
+        obj['toms'] = Strings_ParseLiteral('ACM Transactions on Mathematical Software').Result;
+        obj['toois'] = Strings_ParseLiteral('ACM Transactions on Office Information Systems').Result;
+        obj['toplas'] = Strings_ParseLiteral('ACM Transactions on Programming Languages and Systems').Result;
+        obj['tcs'] = Strings_ParseLiteral('Theoretical Computer Science').Result;
+        return obj;
+    })(Helper.NewEmptyObject()) as ObjectModel_StrLitDict;
+
     public static ProcessEntries(
         entries: Styles_EntryOrEntryData[]): Styles_Plain_ReadonlySortedEntry[]
     {
@@ -124,7 +162,8 @@ class Styles_Plain
             for (let i = 0; i !== len; ++i)
             {
                 result.push(
-                    new Styles_Plain_SortedEntry(true, entries[i], i));
+                    new Styles_Plain_SortedEntry(true, entries[i], i,
+                        Styles_Plain.Macros));
             }
         }
         result.sort(Styles_Plain_SortedEntry.Compare);

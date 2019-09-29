@@ -136,6 +136,28 @@ class ObjectModel_ParseDatabaseResult
     public readonly ofKey: ObjectModel_EntryDataDict;
 
     /**
+     * Macros for jan-dec (as numerals).
+     * This set of macros should be used (passed as `macros` argument)
+     * if no specific style is to be applied.
+     */
+    public static readonly MonthMacros: ObjectModel_StrLitDict = (function (obj)
+    {
+        obj['jan'] = Strings_ParseLiteral('1').Result;
+        obj['feb'] = Strings_ParseLiteral('2').Result;
+        obj['mar'] = Strings_ParseLiteral('3').Result;
+        obj['apr'] = Strings_ParseLiteral('4').Result;
+        obj['may'] = Strings_ParseLiteral('5').Result;
+        obj['jun'] = Strings_ParseLiteral('6').Result;
+        obj['jul'] = Strings_ParseLiteral('7').Result;
+        obj['aug'] = Strings_ParseLiteral('8').Result;
+        obj['sep'] = Strings_ParseLiteral('9').Result;
+        obj['oct'] = Strings_ParseLiteral('10').Result;
+        obj['nov'] = Strings_ParseLiteral('11').Result;
+        obj['dec'] = Strings_ParseLiteral('12').Result;
+        return obj;
+    })(Helper.NewEmptyObject()) as ObjectModel_StrLitDict;
+
+    /**
      * Initializes a new `ParseDatabaseResult` instance.
      * Once filled, call `Helper.FreezeDescendants` and
      * `Helper.FreezeObject` on each member and call
@@ -167,5 +189,21 @@ class ObjectModel_ParseDatabaseResult
             }
         }
         return true;
+    }
+
+    /**
+     * Unresolves all the strings and entries.
+     */
+    public UnresolveAll(): void
+    {
+        const strings = this.Strings;
+        for (const strid in strings)
+        {
+            strings[strid]!.Unresolve();
+        }
+        for (const entry of this.Entries)
+        {
+            entry.Unresolve();
+        }
     }
 }

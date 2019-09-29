@@ -96,7 +96,8 @@ class ObjectModel_StringExprPrivates
     /**
      * Implements `StringExpr.Resolve`.
      */
-    public Resolve(refresh?: boolean): Strings_Literal
+    public Resolve(macros?: ObjectModel_StrLitDict,
+        refresh?: boolean): Strings_Literal
     {
         if (this.Resolving)
         {
@@ -113,7 +114,7 @@ class ObjectModel_StringExprPrivates
                 {
                     pieces.push(summand instanceof Strings_Literal
                         ? summand
-                        : summand.Resolve(refresh));
+                        : summand.Resolve(macros, refresh));
                 }
                 this.Resolved = Strings_Literal.Concat(pieces);
             }
@@ -201,15 +202,17 @@ class ObjectModel_StringExpr
      * An empty result is returned if resolution is in progress.
      * This avoids infinite recursion in case of cyclic dependency.
      * 
+     * @param macros  The macros.
      * @param refresh Whether the cache should be invalidated.
      * 
      * @returns The `Literal` that would have been parsed
      *          had the concatenated string been equivalently written
      *          as a literal string.
      */
-    public Resolve(refresh?: boolean): Strings_Literal
+    public Resolve(macros?: ObjectModel_StrLitDict,
+        refresh?: boolean): Strings_Literal
     {
-        return this._MutablePrivates.Resolve(refresh);
+        return this._MutablePrivates.Resolve(macros, refresh);
     }
 
     /**
