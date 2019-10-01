@@ -540,7 +540,7 @@ abstract class TeX_SimpleRenderer
     [
         /* diacritics */
         '`', "'", '^', '"', '~', '=', '.',
-        'u', 'v', 'H', 't', 'c', 'd', 'b',
+        'u', 'v', 'H', 't', 'c', 'd', 'b', 'r',
         /* text format */
         'text', 'emph',
         'textrm', 'textsf', 'texttt',

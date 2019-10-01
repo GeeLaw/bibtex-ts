@@ -45,6 +45,7 @@ class TeX_TextRendererPrivates extends TeX_SimpleRenderer
         obj['c'] = '̧'; /* 0x0327 */
         obj['d'] = '̣'; /* 0x0323 */
         obj['b'] = '̱'; /* 0x0331 */
+        obj['r'] = '̊'; /* 0x030a */
         return Helper.FreezeObject(obj);
     })(Helper.NewEmptyObject()) as TeX_TextRenderer_CSNameTranslator;
 
