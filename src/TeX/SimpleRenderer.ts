@@ -535,6 +535,9 @@ abstract class TeX_SimpleRenderer
         return this._MutablePrivates.Render();
     }
 
+    /* 2-argument control sequences */
+    public static readonly CtrlSeq2Arg: string[] = ['printfirst', 'switchargs'];
+
     /* 1-argument control sequences */
     public static readonly CtrlSeq1Arg: string[] =
     [
@@ -559,7 +562,9 @@ abstract class TeX_SimpleRenderer
         /* case alternation */
         'uppercase', 'lowercase',
         /* "and others" character */
-        'etalchar'
+        'etalchar',
+        /* example commands in xampl.bib */
+        'noopsort', 'singleletter'
     ];
 
     /* 0-argument control sequences */
@@ -667,6 +672,10 @@ abstract class TeX_SimpleRenderer
      */
     public static CtrlSeqType(csname: string): number
     {
+        if (TeX_SimpleRenderer.CtrlSeq2Arg.indexOf(csname) >= 0)
+        {
+            return 2;
+        }
         if (TeX_SimpleRenderer.CtrlSeq1Arg.indexOf(csname) >= 0)
         {
             return 1;

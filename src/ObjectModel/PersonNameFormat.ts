@@ -262,6 +262,41 @@ class ObjectModel_PersonNameFormat
                 result.push(component);
             }
         }
-        return result.join('');
+        /* This hack aims to be compatible with forced ties
+        ** and the technique of using \relax to remove the space
+        ** between von and Last. Suppose we format
+        **     "d'\relax Ormesson, Jean".
+        ** If I write {vv~~}{ll}, BibTeX will output
+        **     "d'\relax~Ormesson".
+        ** If I write {vv~}{ll}, BibTeX will output
+        **     "d'\relax Ormesson"
+        ** because it thinks a tie is unnecessary.
+        ** In BibTeX-TS, we do not implement discretionary tie,
+        ** and all words within a name are tied together.
+        ** Moreover, the standard styles tie von and Last.
+        ** To make sure
+        **     "d'\relax Ormesson, Jean" #1 "{vv~}{ll}" format.name$
+        ** yields "d'\relax Ormesson" and let forced tie work as expected,
+        ** we do the following conversions:
+        **            "\relax~" => "\relax "
+        **     consecutive ties => one tie
+        ** Note that simply finding "\relax~" doesn't mean we should
+        ** replace it with "\relax ", because it might as well be
+        **     "\\relax~" (line break + "relax" + tie)
+        ** or  "\relax~~" (\relax + forced tie).
+        **/
+        return result.join('').replace(/(\\+relax)?(~+)/g,
+            function (_, relax, tie)
+            {
+                if (relax)
+                {
+                    if (relax.length % 2 === 0 && tie.length === 1)
+                    {
+                        return relax + ' ';
+                    }
+                    return relax + '~';
+                }
+                return '~';
+            });
     }
 }

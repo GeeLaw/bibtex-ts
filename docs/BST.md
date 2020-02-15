@@ -36,7 +36,18 @@ BST `format.name$` function formats a name according to a format string. BibTeX-
 2. Parse name formats out of a usual string using `BibTeX.ParsePersonNameFormat` method.
 3. Format a `PersonName` using `PersonNameFormat.Format` method.
 
-To be written...
+In the name formatting part, an important difference between BibTeX-TS and the official BibTeX is that BibTeX-TS does **not** implement discretionary ties. In particular, the formatted names (before a final tweak) will look as follows:
+
+- If you use `{ll}`, the words in `Last` part will be connected using `~` (tie; or `-` if the two words were connected using a hyphen) and never ` ` (space).
+- If you use `{vv~}{ll}`, the connection between `von` and `Last` will always be `~`.
+- If you use `{vv~~}{ll}`, the connection between `von` and `Last` will be `~~` (two ties).
+
+To compensate for that, the formatted names are **hacked** before being returned to the user:
+
+- For a `\relax` control sequence followed by **exactly one** `~` tie, `\relax~` is replaced by `\relax ` (tie becomes space).
+- For consecutive `~` ties, they are replaced by a single `~` tie.
+
+For example, `a\relax~b`, `\\relax~b`, `a\relax~~b`, `a~~b` become `a\relax b`, `\\relax~b`, `a\relax~b`, `a~b`, respectively. These hacks are done to be compatible with formats using forced ties and to allow the trick of removing the space between `von` and `Last` using `\relax` &mdash; e.g., the name `d'\relax Ormesson, Jean` formatted with `{ff }{vv~}{ll}` will become `Jean d'\relax Ormesson` and rendered as Jean d’Ormesson. Though it highly deviates from the pedantic implementation, it should behave just as good under most normal scenarios.
 
 ## `purify$` function
 

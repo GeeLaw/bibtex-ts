@@ -127,6 +127,8 @@ class TeX_TextRendererPrivates extends TeX_SimpleRenderer
         obj['L'] = 'Ł';
         obj['O'] = 'Ø';
         obj['OE'] = 'Œ';
+        /* no-op */
+        obj['noopsort'] = '';
         return Helper.FreezeObject(obj);
     })(Helper.NewEmptyObject()) as TeX_TextRenderer_CSNameTranslator;
 
@@ -172,6 +174,16 @@ class TeX_TextRendererPrivates extends TeX_SimpleRenderer
             target.Append('', txt);
             return;
         }
+        if (csname === 'printfirst')
+        {
+            this.RenderCtrlSeq_printfirst(args, target);
+            return;
+        }
+        if (csname === 'switchargs')
+        {
+            this.RenderCtrlSeq_switchargs(args, target);
+            return;
+        }
         /* Other commands do nothing to plain text. */
         args.StringConcatInto(target);
     }
@@ -212,6 +224,51 @@ class TeX_TextRendererPrivates extends TeX_SimpleRenderer
     {
         text = TeX_TextRendererPrivates.SmartPuncts(text);
         target.Append(text.substr(0, 1), text.substr(1));
+    }
+
+    private RenderCtrlSeq_printfirst(
+        args: TeX_SimpleRenderer_StackFrame,
+        target: TeX_SimpleRenderer_StackFrame): void
+    {
+        while (args.Char1.length > 1)
+        {
+            args.Char1.pop();
+        }
+        while (args.Char2.length > 1)
+        {
+            args.Char2.pop();
+        }
+        args.StringConcatInto(target);
+    }
+
+    private RenderCtrlSeq_switchargs(
+        args: TeX_SimpleRenderer_StackFrame,
+        target: TeX_SimpleRenderer_StackFrame): void
+    {
+        while (args.Char1.length > 2)
+        {
+            args.Char1.pop();
+        }
+        while (args.Char1.length < 2)
+        {
+            args.Char1.push('');
+        }
+        while (args.Char2.length > 2)
+        {
+            args.Char2.pop();
+        }
+        while (args.Char2.length < 2)
+        {
+            args.Char2.push('');
+        }
+        let tmp = undefined;
+        tmp = args.Char1[0];
+        args.Char1[0] = args.Char1[1];
+        args.Char1[1] = tmp;
+        tmp = args.Char2[0];
+        args.Char2[0] = args.Char2[1];
+        args.Char2[1] = tmp;
+        args.StringConcatInto(target);
     }
 
 }
