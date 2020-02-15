@@ -23,7 +23,7 @@ Note that if you change `A: {}B` to title case, the result is `A: {}b` because `
 There are some pedantic features in the BST `change.case$` function.
 
 - It doesn't fully handle the conversion of `\i\j\ss` with other LaTeX commands. For example, `{\ae\ss}` will be converted into `{\AESS}`, instead of the desired `{\AE SS}`. (It does handle the case `{\"\i \j}` being converted to `{\"IJ}`. Note how the space between `\i` and `\j` disappears.)
-- It doesn't preserve the eligiblity as a special character. For example, `{\ss}` will be converted into `{SS}`, which is no longer a special character.
+- It doesn't preserve the eligibility as a special character. For example, `{\ss}` will be converted into `{SS}`, which is no longer a special character.
 - If a special character is the first character or the first character after a colon with whitespace, all characters inside it have their cases preserved. For example, `{\AE\OE}` is `{\AE\OE}` when converted to title case, **not** `{\AE\oe}`.
 
 BibTeX-TS counterpart is `ToXxxCase` and `ToCase` methods on `Literal` instance. BibTeX-TS makes effort to make sure the space between LaTeX commands and non-commands are correctly inserted or removed, and that a special character remains a special character after conversion (by adding `\relax`, e.g. `{\ss}` in upper case is `{\relax SS}`). It faithfully implements the pedantic feature about case preservation inside a special character.
@@ -59,7 +59,7 @@ Specifically, this means the length of `c{\~ab}{{\LaTeX}}` is 8 (`c`, special ch
 
 ## `text.prefix$` function
 
-BST `text.prefix$` function comptues the prefix of a string (with balanced braces) of specified length. BibTeX-TS counterparts are the `Prefix` and `PrefixRaw` methods on `Literal` instances. `Prefix` returns the prefix as a `Literal`, whereas `PrefixRaw` returns the prefix as a plain `string`. The latter avoids overhead of arranging the content into a `Literal` and can be used if the prefix is direcly handled as plain strings.
+BST `text.prefix$` function computes the prefix of a string (with balanced braces) of specified length. BibTeX-TS counterparts are the `Prefix` and `PrefixRaw` methods on `Literal` instances. `Prefix` returns the prefix as a `Literal`, whereas `PrefixRaw` returns the prefix as a plain `string`. The latter avoids overhead of arranging the content into a `Literal` and can be used if the prefix is directly handled as plain strings.
 
 They should faithfully reimplement the effect of `text.prefix$`:
 
@@ -70,6 +70,6 @@ Specifically, this means the prefix of length 4 of `c{\~ab}{{\LaTeX}}` is `c{\~a
 
 ## Why not BST interpreters in JavaScript?
 
-The constructs that the BST language natively supports is very limited and it is cumbersome to program in it. Moreover, some operations don't have idiomatic efficient implementation, e.g., integer multiplication is implmented as repeated addition.
+The constructs that the BST language natively supports is very limited and it is cumbersome to program in it. Moreover, some operations don't have idiomatic efficient implementation, e.g., integer multiplication is implemented as repeated addition.
 
 The BST language is used to produce output that the TeX typesetter would like, which is very limited. The original motive of creating this library is to be able to use BibTeX in my blog building system, which requires content be rendered as HTML. BibTeX-TS parses BibTeX databases into objects with methods, and the consumers are supposed to operate over the objects and let it retain that form, except when preparing for final output. Therefore, it suffices to implement the important BST functions and let the usual operations be handled by JavaScript.

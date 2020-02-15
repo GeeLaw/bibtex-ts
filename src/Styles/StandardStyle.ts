@@ -607,7 +607,7 @@ class Styles_StandardStyle
     public phdthesis(entry: ObjectModel_Entry): string
     {
         return this.that.thesis(entry,
-            Styles_StandardStyleHelper.MastersThesisType);
+            Styles_StandardStyleHelper.PhDThesisType);
     }
 
     public proceedings(entry: ObjectModel_Entry): string

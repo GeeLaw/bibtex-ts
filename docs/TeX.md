@@ -8,13 +8,13 @@ The namespace also has a method `ToPlainText`, which takes a `string` and return
 
 The `SimpleRenderer` class is an example of how to use `SimpleHandler`. It implements a basic recursive TeX handling template. The handler tokenises the character stream, asks its derived class in a structural way to render the content.
 
-The rendering process is stack-based. There is a nested class `SimpleRenderer.StackFrame` that stores a frame in the stack. Each stack frame consists of several runs of text, each of which is split into 2 parts, `Char1` and `Char2`. Rendering diacritics will require knowing where to put the combinding diacritical mark --- after `Char1`. The class provides `Append` and `StringConcatInto`. The latter method is handy if the rendering process is string concatenation.
+The rendering process is stack-based. There is a nested class `SimpleRenderer.StackFrame` that stores a frame in the stack. Each stack frame consists of several runs of text, each of which is split into 2 parts, `Char1` and `Char2`. Rendering diacritics will require knowing where to put the combining diacritical mark --- after `Char1`. The class provides `Append` and `StringConcatInto`. The latter method is handy if the rendering process is string concatenation.
 
 The `SimpleRenderer` uses the model of `SimpleHandler`, which treats `{`, `}`, `$$`, `$` as group opening delimiter, group closing delimiter, display equation switching delimiter and inline equation switching delimiter. It also treats `\<symbol>` and `\Letters   ` as control sequences.
 
 ### Rendering control sequences
 
-Upon each control sequence, `SimpleRenderer` relies on the dervide class to determine the nature of the control sequence --- whether it is a command that accepts 0 or more arguments (e.g., `\"`, `\relax`, `\LaTeX`, etc.), an in-group alternation (e.g., `\bf`, `\scshape`, `\normalsize`, etc., whose effects persisit until the end of the enclosing group), a group opening delimiter (e.g., `\bgroup`), a group closing delimiter (e.g., `\egroup`), an inline equation opening delimiter (e.g., `\(`), an inline equation closing delimiter (e.g., `\)`), an inline equation switching delimter, a display equation opening delimiter (e.g., `\[`), a display equation closing delimiter (e.g., `\]`) or a display equation switching delimiter. The derived class should implement `CtrlSeqType` and `CtrlSeqTypeInMath` to determine the nature of control sequences.
+Upon each control sequence, `SimpleRenderer` relies on the derived class to determine the nature of the control sequence --- whether it is a command that accepts 0 or more arguments (e.g., `\"`, `\relax`, `\LaTeX`, etc.), an in-group alternation (e.g., `\bf`, `\scshape`, `\normalsize`, etc., whose effects persist until the end of the enclosing group), a group opening delimiter (e.g., `\bgroup`), a group closing delimiter (e.g., `\egroup`), an inline equation opening delimiter (e.g., `\(`), an inline equation closing delimiter (e.g., `\)`), an inline equation switching delimiter, a display equation opening delimiter (e.g., `\[`), a display equation closing delimiter (e.g., `\]`) or a display equation switching delimiter. The derived class should implement `CtrlSeqType` and `CtrlSeqTypeInMath` to determine the nature of control sequences.
 
 TeX commands frequently appearing in BibTeX files are identified by the static `SimpleRenderer.CtrlSeqType` method. However, it is not necessary that an implementation handles all these commands.
 
@@ -28,7 +28,7 @@ An unidentified control sequence should be (somehow) rendered by the derived cla
 
 ### Rendering groups, virtual groups, equations and finishing up
 
-The dervied class should implement `RenderGroup`, `RenderVirtGroup`, `RenderMathInline` and `RenderMathDisplay` to render the contents. When rendering a group or a virtual group, the method should push exactly 1 pair of `Char1` and `Char2` into `target`. Usually, `args.Char1[0]` should become the `Char1` pushed into `target`. When rendering an equation, the method should push exactly 1 pair of `Char1` and `Char2` into `target`. Usually, the pushed `Char1` should be empty so that no diacritical marks is put on the equation (if something in the equation itself needs a diacritical mark, it should be rendered within the equation).
+The derived class should implement `RenderGroup`, `RenderVirtGroup`, `RenderMathInline` and `RenderMathDisplay` to render the contents. When rendering a group or a virtual group, the method should push exactly 1 pair of `Char1` and `Char2` into `target`. Usually, `args.Char1[0]` should become the `Char1` pushed into `target`. When rendering an equation, the method should push exactly 1 pair of `Char1` and `Char2` into `target`. Usually, the pushed `Char1` should be empty so that no diacritical marks is put on the equation (if something in the equation itself needs a diacritical mark, it should be rendered within the equation).
 
 To finish rendering, implement `RenderAll`.
 
