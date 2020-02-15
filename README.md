@@ -8,5 +8,5 @@ It would be amazing if you find it useful.
 
 ## To-Dos
 
-- [ ] Add tests.
+- [x] Add tests. (Basic test cases in `tests/basic.js`, credits to Tame the BeaST by Nicolas Markey.)
 - [ ] Implement `acm`, `apalike`, and `siam`. Note that `ieeetr` and `unsrt` are not implementable unless we introduce body-dependent sorting.
